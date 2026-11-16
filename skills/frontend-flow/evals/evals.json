@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "our landing page at apps/web/src/pages/index.tsx looks dated and kind of generic, can you redesign it? keep our logo and colors, the copy is fine",
-      "expected_output": "Captures PRODUCT.md/DESIGN.md via impeccable, runs critique, asks refine vs reinvent, picks refine (brand kept), applies targeted impeccable commands, finishes with audit + screenshots at two widths. Does not run Hallmark install-hook.",
+      "expected_output": "Captures PRODUCT.md/DESIGN.md via impeccable, runs critique, asks refine vs reinvent naming /hallmark redesign, picks refine (brand kept), asks for a clean git tree, lists Floor-vs-DESIGN.md conflicts before building, runs Hallmark redesign at restyle depth with scaffold --brand, fixes content/logic critique findings with impeccable commands or lists them, finishes with impeccable audit + screenshots at two widths. Does not run Hallmark install-hook.",
       "files": []
     },
     {

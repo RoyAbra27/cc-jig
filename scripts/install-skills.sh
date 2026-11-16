@@ -59,4 +59,10 @@ for n in $PICK; do
   eval "$cmd" && echo "installed $name" || failed+=("skill $name")
 done
 
+# frontend-flow runs Hallmark itself; upstream lets it self-trigger and compete with Impeccable
+HM="$SKILLS_DIR/hallmark/SKILL.md"
+if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
+  sed -i '0,/^name:/s//disable-model-invocation: true\nname:/' "$HM" && echo "patched   hallmark (user-invoke only)"
+fi
+
 [ ${#failed[@]} -eq 0 ] || { printf 'failed: %s\n' "${failed[@]}" >&2; exit 1; }

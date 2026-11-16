@@ -1,17 +1,19 @@
 ---
 name: frontend-flow
-description: Runs UI work as a chain over the installed design tools instead of picking one - Impeccable for context, critique and finish checks, Hallmark for a full visual reinvention, android-skills plus device screenshots for Android. Use whenever the user wants to redesign, restyle or improve an existing landing page or website, design or review UX/UI for an Android app or screen, or build a new marketing page, even if they name only one tool or just say "make this look better". Not for backend work, charts (dataviz) or architecture diagrams (archify).
+description: Runs UI work as a chain over the installed design tools instead of picking one - Impeccable for context, critique and finish checks, Hallmark for the visual pass (restyle on refine, full redesign on reinvent), android-skills plus device screenshots for Android. Use whenever the user wants to redesign, restyle or improve an existing landing page or website, design or review UX/UI for an Android app or screen, or build a new marketing page, even if they name only one tool or just say "make this look better". Not for backend work, charts (dataviz) or architecture diagrams (archify).
 ---
 
 # Frontend flow
 
-Impeccable and Hallmark each solve part of the job and would compete if both triggered on their own. This skill fixes the order: Impeccable owns context, critique and the final checks; Hallmark is called only for a full reinvention; Android work adds the platform skills and real-device evidence. Each tool keeps its own instructions; this file only decides who runs when and what passes between them.
+Impeccable and Hallmark each solve part of the job and would compete if both triggered on their own. This skill fixes the order: Impeccable owns context, critique and the final checks; Hallmark does the visual pass on the web, at restyle depth for a refine and full depth for a reinvent; Android work adds the platform skills and real-device evidence. Each tool keeps its own instructions; this file only decides who runs when and what passes between them.
 
-Paths: Impeccable at `~/.claude/skills/impeccable/SKILL.md`, Hallmark at `~/.claude/skills/hallmark/SKILL.md`. Hallmark is set to user-invoke only, so the Skill tool will refuse it: read its SKILL.md and follow it directly.
+Why the split (blind bake-off, 2026-11-16, 3 web pages and an auth screen pair, same brief per pair): the user picked Hallmark's restyle over Impeccable's refine on looks 3 to 0 with one tie, but only Impeccable's critique caught content and logic problems. Neither replaces the other.
+
+Paths: Impeccable at `~/.claude/skills/impeccable/SKILL.md`, Hallmark at `~/.claude/skills/hallmark/SKILL.md`. Hallmark is set to user-invoke only, so the Skill tool will refuse it: read its SKILL.md and follow it directly. Hallmark only redesigns an existing page when the user names it, so when step 2's options are offered, say each one runs `/hallmark redesign`: the user's pick is that naming, and the run is a `/hallmark redesign <target>` run.
 
 ## 1. Context first
 
-Invoke `impeccable` and run its setup. If `PRODUCT.md` is missing, run `impeccable init`; if `DESIGN.md` is missing and the project already has UI, run `impeccable document` so the current system is captured from code, not guessed. Do this for every redesign, restyle or new page, even when the request feels scoped: the files are what the next session and Hallmark read, and a redesign without them gets redone from scratch next time. Only a single-component tweak may skip it; then offer it at the end.
+Invoke `impeccable` and run its setup. If `PRODUCT.md` is missing, run `impeccable init`; if `DESIGN.md` is missing and the project already has UI, run `impeccable document` so the current system is captured from code, not guessed. Hallmark reads a root `DESIGN.md` as a locked system, so on a reinvent (known after step 2) write it as `DESIGN.previous.md` instead, or the old look gets locked in. Do this for every redesign, restyle or new page, even when the request feels scoped: the files are what the next session and Hallmark read, and a redesign without them gets redone from scratch next time. Only a single-component tweak may skip it; then offer it at the end.
 
 ## Scope is what the user sees
 
@@ -28,19 +30,26 @@ In both paths, copy edits (buzzword cleanup, rewritten headlines) are suggestion
 
 Default to designing on Impeccable's decision page: every reinvent, redesign or new screen goes through it, and a refine that has two or more real options (layout, hierarchy, a component's form) offers it too. Do not compress Impeccable's decision steps into a chat question when a human is present: run its visual decision page (`serve-question`) with sketches or comps so the user picks from pictures, and run its finish review before calling the work done. Those two steps are what lift the result above "fine but generic"; skipping them tends to produce a timid result.
 
-## 3a. Refine path (Impeccable only)
+## 3. Before Hallmark runs (both web paths)
 
-Use the commands the critique points to (`layout`, `typeset`, `colorize`, `clarify`, `harden`, `adapt`, ...), one at a time, then `polish`.
+- **Render tier.** `sloplint --render` (and `.hallmark/compare.html`) needs `puppeteer-core`. If sloplint reports none, point `HALLMARK_PUPPETEER` at a copy already on the machine (for example under `$(npm root -g)/@mermaid-js/mermaid-cli/node_modules/puppeteer-core`) and `CHROME_PATH` at agent-browser's Chrome; do not install one. Without it the sweep is static only: say so.
+- Do not run `scripts/install-hook.mjs`: it rewrites `settings.json`. Hallmark's image generation calls the Together API and only runs when `TOGETHER_API_KEY` is set; mention that before using it.
 
-## 3b. Reinvent path (Hallmark)
+## 3a. Refine path (Hallmark restyle, Impeccable's findings)
 
-Read Hallmark's SKILL.md and run its `redesign <target>` flow. Hallmark treats a root `DESIGN.md` as a locked system and will stay inside it. If the user wants a new look, say so and ask before renaming `DESIGN.md` (e.g. to `DESIGN.previous.md`); if they want the brand kept, leave it, and Hallmark will restructure within it.
+1. **Floor vs brand.** Hallmark's Floor is not waivable and outranks a locked `DESIGN.md`: in the bake-off it rewrote a documented uppercase tracked label style and amended `DESIGN.md` without asking. Before the build, list each place the project's `DESIGN.md` or brand breaks a Floor rule (tracked capitals, middle-dot meta, pure white, literal colours) and ask the user per item: accept Hallmark's fix, or skip Hallmark for that element.
+2. Run `/hallmark redesign <target>` at **restyle** depth (say *keep the layout*), or **polish** depth when the user asked only for fixes. Use `scaffold --brand` so the brand's values come from the project's files. Pass the step 2 critique findings in as the "what is wrong" answer.
+3. Hallmark fixes styling tells, not content. Findings from step 2 that are about what the page says or does (data that reads wrong, misleading emphasis, logic bugs) are fixed with Impeccable's commands (`clarify`, `harden`, `layout`, ...) after Hallmark, or listed for the owner when they need copy or logic changes.
 
-Do not run `scripts/install-hook.mjs`: it rewrites `settings.json`. Hallmark's image generation calls the Together API and only runs when `TOGETHER_API_KEY` is set; mention that before using it.
+A single-component tweak, or a project with no git, skips Hallmark: use the Impeccable command the critique points to, then `polish`.
+
+## 3b. Reinvent path (Hallmark full)
+
+Read Hallmark's SKILL.md and run its `redesign <target>` flow at full depth. If a root `DESIGN.md` exists and the user wants a new look, say so and ask before renaming it (e.g. to `DESIGN.previous.md`); if they want the brand kept, leave it, and Hallmark will restructure within it.
 
 ## 4. Finish checks (both paths)
 
-Run `impeccable audit <target>` on the result and fix what it flags, then `polish`. On the mobile screenshot (390px), look specifically at the side gutters: text and cards should sit at least 16px from both edges, because full-bleed layouts that look intentional at 1440px often end up touching the screen edge on a phone. Capture each viewport from a fresh load at that size: set the viewport first, then navigate with a new query string (a hash-only change does not reload), scroll to the top, and take a viewport-sized screenshot (make the viewport tall for a whole tab) rather than a full-page one, which stacks sticky bars over the content (added 2026-11-10). Before saying done, show evidence: screenshots at mobile and desktop width plus the audit outcome, per superpowers:verification-before-completion.
+Run `impeccable audit <target>` on the result and fix what it flags, then `polish`. After a Hallmark run, treat the detector's `ai-color-palette` hits on the brand's own documented colour as false positives, and do not let `polish` undo Hallmark's Floor fixes. On the mobile screenshot (390px), look specifically at the side gutters: text and cards should sit at least 16px from both edges, because full-bleed layouts that look intentional at 1440px often end up touching the screen edge on a phone. Capture each viewport from a fresh load at that size: set the viewport first, then navigate with a new query string (a hash-only change does not reload), scroll to the top, and take a viewport-sized screenshot (make the viewport tall for a whole tab) rather than a full-page one, which stacks sticky bars over the content (added 2026-11-10). Before saying done, show evidence: screenshots at mobile and desktop width plus the audit outcome, per superpowers:verification-before-completion.
 
 ## Android path
 
