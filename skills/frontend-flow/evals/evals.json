@@ -36,6 +36,12 @@
       "prompt": "finish review the data room page: capture desktop and phone screenshots for the reviewer",
       "expected_output": "Sets each viewport before loading, navigates with a fresh query string (not a hash-only change), scrolls to top and takes viewport-sized (tall) screenshots, not full-page ones; never resizes an already-loaded page to produce the phone capture.",
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "can you polish the pricing page on our site (site/src/pages/pricing.astro)? spacing and type feel off",
+      "expected_output": "Triggers frontend-flow, not impeccable on its own: impeccable context and critique first, then the visual pass at refine depth, ends with impeccable audit and screenshots at two widths.",
+      "files": []
     }
   ]
 }

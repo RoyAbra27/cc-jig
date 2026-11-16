@@ -1,6 +1,6 @@
 ---
 name: frontend-flow
-description: Runs UI work as a chain over the installed design tools instead of picking one - Impeccable for context, critique and finish checks, Hallmark for the visual pass (restyle on refine, full redesign on reinvent), android-skills plus device screenshots for Android. Use whenever the user wants to redesign, restyle or improve an existing landing page or website, design or review UX/UI for an Android app or screen, or build a new marketing page, even if they name only one tool or just say "make this look better". Not for backend work, charts (dataviz) or architecture diagrams (archify).
+description: Runs UI work as a chain over the installed design tools instead of picking one - Impeccable for context, critique and finish checks, Hallmark for the visual pass (restyle on refine, full redesign on reinvent), android-skills plus device screenshots for Android. Use whenever the user wants to redesign, restyle, polish, critique or improve an existing landing page or website, design or review UX/UI for an Android app or screen, or build a new marketing page, even if they name only one tool or just say "make this look better". Not for backend work, charts (dataviz) or architecture diagrams (archify).
 ---
 
 # Frontend flow
