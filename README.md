@@ -60,7 +60,7 @@ bootstrap.sh       new-machine setup
 
 | Command | What it does |
 |---|---|
-| [`/save-session`](commands/save-session.md) | Writes the goal, what's done and verified, what failed, what couldn't run, and what's next to `~/.claude/sessions/`. Updated at each milestone, and runs `/reflect` on the final save |
+| [`/save-session`](commands/save-session.md) | Writes the goal, what's done and verified, what failed, what couldn't run, and what's next to `~/.claude/sessions/` when you stop, and runs `/reflect` |
 | [`/resume-session`](commands/resume-session.md) | Reads a saved session file, summarizes it, and confirms the plan before continuing |
 | [`/reflect`](commands/reflect.md) | Lists what went wrong this session, with evidence, and proposes the smallest fix at the right layer. Applies only what you approve |
 

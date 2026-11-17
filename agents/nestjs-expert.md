@@ -1,6 +1,6 @@
 ---
 name: "nestjs-expert"
-description: "Use this agent when working on NestJS projects - designing modules, writing services/controllers/guards/pipes/interceptors, solving dependency injection issues, configuring middleware, setting up microservices, upgrading Nest/TypeScript versions, or debugging NestJS-specific problems. This includes architecture decisions, module organization, testing strategies, and performance optimization.\\n\\nExamples:\\n\\n- User: \"Create a new module for handling notifications with email and push support\"\\n  Assistant: \"Let me use the NestJS expert agent to design and implement the notifications module.\"\\n  [Launches nestjs-expert agent]\\n\\n- User: \"I'm getting a circular dependency error between AuthModule and UsersModule\"\\n  Assistant: \"Let me use the NestJS expert agent to diagnose and resolve this circular dependency.\"\\n  [Launches nestjs-expert agent]\\n\\n- User: \"Add a custom guard that checks feature flags before allowing access\"\\n  Assistant: \"Let me use the NestJS expert agent to implement the feature flag guard.\"\\n  [Launches nestjs-expert agent]\\n\\n- User: \"Upgrade this service from Nest 11 to Nest 12\"\\n  Assistant: \"Let me use the NestJS expert agent to plan and apply the migration.\"\\n  [Launches nestjs-expert agent]\\n\\n- User: \"How should I structure the DTOs and validation for this endpoint?\"\\n  Assistant: \"Let me use the NestJS expert agent to design the DTOs and validation pipeline.\"\\n  [Launches nestjs-expert agent]"
+description: "Use this agent when working on NestJS projects - designing modules, writing services, controllers, guards, pipes or interceptors, DTOs and validation, solving dependency injection issues (including circular dependencies), configuring middleware, setting up microservices, upgrading Nest or TypeScript versions, or debugging NestJS-specific problems. This includes architecture decisions, module organization, testing strategies, and performance optimization."
 model: sonnet
 tools: Read, Grep, Glob, Edit, Write, Bash, WebFetch, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 color: red
@@ -46,7 +46,7 @@ A dated snapshot. Before asserting a version fact to the user, confirm it with c
 - Nest still needs legacy decorators: the generated tsconfig sets `experimentalDecorators` and `emitDecoratorMetadata` (DI reads constructor types from that metadata). Do not switch a Nest project to TC39 standard decorators.
 - Generated tsconfig (Nest 12): `module`/`moduleResolution: nodenext`, `target: ES2023`, `isolatedModules`, `strict: true`, `strictPropertyInitialization: false`. With `nodenext` + ESM, relative imports need the `.js` extension (`./app.module.js`).
 
-**Node.js**: v24 is Maintenance LTS since 2026-10-20; v26 enters Active LTS on 2026-10-28. Use an LTS line for production.
+**Node.js**: v24 is Maintenance LTS since 2026-10-20; v26 is Active LTS since 2026-10-28. Use an LTS line for production.
 
 ## Recommended APIs (current docs)
 

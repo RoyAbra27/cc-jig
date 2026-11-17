@@ -7,7 +7,7 @@ description: The user's testing requirements and workflow - TDD, bug-repro-test-
 
 - **Every code change needs tests** - new services/features get a spec file written first (TDD red-green-refactor). No new behavior gets merged without a corresponding test.
 - **Bug fixes**: add a test that reproduces the bug BEFORE fixing it, then verify the fix makes it pass.
-- **Modified behavior**: update existing tests in the same change. If a method changes what it returns or throws, the tests MUST be updated alongside it.
+- **Modified behavior**: update existing tests in the same change, including when a method changes what it returns or throws.
 - Read the source file fully before writing tests.
 - Use existing test utilities/fixtures from the project (e.g. `test-utils.ts`) - never recreate mocks locally.
 - Use parameterized tests (`it.each` / `parametrize`) over copy-paste test blocks.
