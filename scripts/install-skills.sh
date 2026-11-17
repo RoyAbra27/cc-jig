@@ -13,6 +13,7 @@ CATALOG=(
   "archify|diagrams and one-page explainers|$sk https://github.com/tt-a1i/archify --skill archify ${T[*]}"
   "impeccable|frontend design, critique and polish (+ 4 agents, design hook)|npx -y impeccable install --providers=claude --scope=global"
   "hallmark|full visual redesign of a site|$sk nutlope/hallmark ${T[*]}"
+  "unslop|turn AI-looking UI into a designed interface|$sk heydamir/unslop --skill unslop ${T[*]}"
   "security-audit|Cloudflare's security review workflow|$sk cloudflare/security-audit-skill --skill security-audit ${T[*]}"
   "codebase-design|deep-module design vocabulary (mattpocock)|$sk mattpocock/skills --skill codebase-design ${T[*]}"
   "improve-codebase-architecture|find refactor opportunities (mattpocock)|$sk mattpocock/skills --skill improve-codebase-architecture ${T[*]}"
@@ -59,10 +60,12 @@ for n in $PICK; do
   eval "$cmd" && echo "installed $name" || failed+=("skill $name")
 done
 
-# frontend-flow runs Hallmark itself; upstream lets it self-trigger and compete with Impeccable
-HM="$SKILLS_DIR/hallmark/SKILL.md"
-if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
-  sed -i '0,/^name:/s//disable-model-invocation: true\nname:/' "$HM" && echo "patched   hallmark (user-invoke only)"
-fi
+# frontend-flow runs these itself; upstream lets them self-trigger and compete with Impeccable
+for s in hallmark unslop; do
+  HM="$SKILLS_DIR/$s/SKILL.md"
+  if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
+    sed -i '0,/^name:/s//disable-model-invocation: true\nname:/' "$HM" && echo "patched   $s (user-invoke only)"
+  fi
+done
 
 [ ${#failed[@]} -eq 0 ] || { printf 'failed: %s\n' "${failed[@]}" >&2; exit 1; }

@@ -127,6 +127,7 @@ These third-party skills are not included in this repo. `scripts/install-skills.
 | archify | [tt-a1i/archify](https://github.com/tt-a1i/archify) | Apache-2.0 |
 | impeccable (+ its agents) | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Apache-2.0 |
 | hallmark | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) | MIT |
+| unslop | [heydamir/unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky | CC-BY-4.0 |
 | security-audit | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) | MIT |
 | codebase-design, improve-codebase-architecture, to-tickets, wizard | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
 | android-material3-design-system, android-viewsystem-foundations | [krutikJain/android-agent-skills](https://github.com/krutikJain/android-agent-skills) | MIT |
