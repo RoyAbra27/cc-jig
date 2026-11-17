@@ -59,7 +59,7 @@ Replace steps 3-4 with:
 
 1. `impeccable critique` and `audit` on the screen, which load Impeccable's Android and native references (Material 3 structure, system Back, edge-to-edge).
 2. Implement in the screen's existing UI system. An XML Views screen (a Fragment with `res/layout/*.xml`) is refined in XML; migrating it to Compose is a separate decision to offer, never a side effect of a UX pass. For Compose screens, or when the user chooses migration, use the matching skill from the `android-skills` plugin: `adaptive` (layouts across sizes), `migrate-xml-views-to-jetpack-compose`, `jetpack-compose-performance`, `navigation-3`, `testing-setup`. They appear in the skill list only where the plugin is enabled; if they are missing, tell the user to enable `android-skills@android-skills` for this project and continue with Impeccable's `android.md` guidance.
-3. Verify on a device or emulator with the mobile MCP: build, launch, `mobile_list_elements_on_screen` for structure and a screenshot for the visual result, and compare against the critique findings.
+3. Verify on a device or emulator with the mobile MCP: build, launch, `mobile_list_elements_on_screen` for structure and a screenshot for the visual result, and compare against the critique findings. Scroll every scrollable screen to its end before judging it, and check the last element against the bottom navigation and the system bar: a button flush with either is an overflow bug (added 2026-11-16).
 4. Run the project's unit and UI tests (`./gradlew testDebugUnitTest`, plus instrumented tests if the screen has them) per testing-workflow.
 
 ## New page from nothing

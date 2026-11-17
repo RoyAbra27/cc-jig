@@ -42,6 +42,12 @@
       "prompt": "can you polish the pricing page on our site (site/src/pages/pricing.astro)? spacing and type feel off",
       "expected_output": "Triggers frontend-flow, not impeccable on its own: impeccable context and critique first, then the visual pass at refine depth, ends with impeccable audit and screenshots at two widths.",
       "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "check the settings and dashboard screens of the android app on the test phone, does anything look off?",
+      "expected_output": "Uses the Android path: screenshots each screen, scrolls every scrollable screen to its end before judging, and reports a last button that sits flush against the bottom navigation or the system bar as an overflow bug; does not call a view missing before scrolling.",
+      "files": []
     }
   ]
 }
