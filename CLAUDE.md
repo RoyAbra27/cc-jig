@@ -8,10 +8,10 @@
 - PowerShell profile is the path `$PROFILE` reports (~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1), not the stale OneDrive copy; oh-my-posh config is ~/.oh-my-posh/clean-detailed.omp.json
 - When running PowerShell commands from bash, use absolute Windows paths (C:\Users\USER\...) not $HOME
 - Any `!` command suggested to the user uses absolute paths: the session cwd moves between repos and worktrees (added 2026-11-11)
-- **Git Bash path rewriting (added 2026-10-29):** an argument starting with `/` that is not a file path (URL path, health-check path, route) gets rewritten to `C:/Program Files/Git/...`; prefix that command with `MSYS_NO_PATHCONV=1`. Never set it globally: it breaks `/c/...` paths passed to Windows programs
+- **Git Bash path rewriting (added 2026-10-29):** an argument starting with `/` that is not a file path (URL path, health-check path, route) gets rewritten to `C:/Program Files/Git/...`; prefix that command with `MSYS_NO_PATHCONV=1`. Never set it globally: it breaks `/c/...` paths passed to Windows programs. A remote one-off command (Render job `--start-command`) gets no shell either: never put `$VAR`, quotes or shell syntax there, because an error echoes the expanded string (added 2026-11-11). Run a plain repo command (`islp ...`) that reads its env itself
 - Run repo shell scripts with the Bash tool, never `bash` inside PowerShell: there it resolves to the WSL launcher (added 2026-10-29)
 - Before re-running a stopped test or smoke suite, kill leftover `node`/`python` children (`taskkill //F //T //PID <pid>`); results from a run that overlapped stale processes are invalid (added 2026-10-29)
-- Git Bash heredocs break on Hebrew text ("unexpected EOF") and mangle backslash escapes (a regex `\b` or `\1` becomes a control character): write any script with Hebrew, regex or backslashes to a file with the Write tool and run the file (added 2026-11-10)
+- Git Bash heredocs break on Hebrew text ("unexpected EOF") and mangle backslash escapes (a regex `\b` or `\1` becomes a control character): write any script with Hebrew, regex, backslashes or JS template literals (backticks) to a file with the Write tool and run the file (added 2026-11-10, JS 2026-11-16). Even in a script file, `$'...'` inside `$( )` breaks; do CR and regex work in Python (added 2026-11-15)
 
 ## Git Workflow
 - Use conventional commits (feat:, fix:, refactor:, docs:, test:, chore:)
