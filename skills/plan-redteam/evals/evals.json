@@ -21,6 +21,13 @@
       "expected_output": "Same review and one-round debate; because the user explicitly waived the approval step, the agreed changes are applied to a copy of the plan in the outputs directory and verified (grep for removed terms such as customer_email and Kafka), with a short summary table of what changed.",
       "files": ["evals/files/orders-export-plan.md"],
       "assertions": []
+    },
+    {
+      "id": 4,
+      "prompt": "Red team this plan: after a grocery order arrives from one store, offer to rename the list row to the search term that worked. The reviewer worries a rename could orphan the other store's learning if that store later orders from the same build. The household usually orders from only one of the two stores per shop, and the other store's cart keeps the build's lines.",
+      "expected_output": "When the debate converges on a guard such as 'hide the offer while the other store can still order from the latest build', the author checks it against the usual flow (one store ordered, the other cart still full) and sees the guard always holds there, so the offer would never show. The author rejects or narrows it (e.g. hide only while the other store's order is waiting) and requires a test that uses the usual-flow data (other cart full, no order waiting) and asserts the offer shows.",
+      "files": [],
+      "assertions": []
     }
   ]
 }

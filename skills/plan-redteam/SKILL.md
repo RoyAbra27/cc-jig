@@ -27,6 +27,8 @@ Treat every attack as a hypothesis. Check it against the primary source (the doc
 
 Concede freely when the attack is right, including when it exposes a false justification in your own doc. Defend only where you have evidence. A defense that is only "it's fine" teaches the reviewer nothing.
 
+Before sending, check every change that hides, gates or delays a feature, whether yours or the reviewer's. Name the user's usual flow in which the feature still fires, and require that change's test to use that flow's data, not an empty case (added 2026-11-16).
+
 Send all answers in one message to the same agent (SendMessage to its ID). Ask for exactly this reply:
 - `A<n>: accept | insist | compromise - <exact final change>` for each attack;
 - a numbered **agreed change list**, grouped by file.
