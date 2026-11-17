@@ -2,7 +2,7 @@
 
 Each lane prompt is: "You are the <LANE> lane of a multi-lane final audit. Read <brief path> first; it is your contract. Lane name for IDs and file: `<lane>`." plus the scope below, adapted to the repo's actual stack and paths. Name concrete files; vague scopes produce vague findings.
 
-Every code lane also covers, as a closing section, over-engineering in its area (reinvented stdlib/framework/installed-dep features, abstractions with one implementation, duplicated logic and test setup, swallowed errors, narrating comments) and test gaps for the behaviour it reviewed.
+Every code lane also covers, as a closing section, over-engineering in its area (reinvented stdlib/framework/installed-dep features, abstractions with one implementation, duplicated logic and test setup, swallowed errors, narrating comments), missed efficiency in its area (N+1 queries, repeated work or network calls inside loops, unbounded reads where a page or stream would do, sequential awaits that could run in parallel; reported only with the code path and the input size where it bites), and test gaps for the behaviour it reviewed.
 
 ## api-surface (always, when the branch exposes HTTP/RPC)
 Attacker and correctness view of every externally reachable entry point.
