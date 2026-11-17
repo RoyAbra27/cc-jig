@@ -33,6 +33,7 @@ Default to designing on Impeccable's decision page: every reinvent, redesign or 
 ## 3. Before unslop runs (both web paths)
 
 - **Rules vs brand.** unslop's rules can overrule a real brand: sentence case only (no tracked capitals), weights 400 and 500 (600 at most), no italic emphasis, no hue-to-hue gradients on surfaces, and violet-blue gradients, glows and sparkles count as slop even in a logo unless the user says they are brand. Before the build, list each place the project's `DESIGN.md` or brand breaks one of these and ask the user per item: keep the brand's version, or accept unslop's.
+- **References.** With the step 2 question, ask for 1-3 reference screenshots (Mobbin, a competitor, a past page). If given, unslop's direction names what to take from each, and the step 4 screenshots are compared side by side with them (added 2026-11-17).
 - **Direction gate.** unslop writes its audit and a five-line direction (product, character, world, moments, signature) and waits for approval before editing. Show both on Impeccable's decision page when a reinvent or new page has real options; otherwise in chat.
 - **Images.** unslop can generate a hero visual when an image tool is available; say which tool and that it may cost money before using it.
 
