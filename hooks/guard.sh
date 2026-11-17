@@ -49,6 +49,19 @@ $(git diff HEAD -U0 2>/dev/null)"
       exit 2
     fi
   fi
+  # Added 2026-11-16 (ratchet, 3rd credential leak into the chat): never dump
+  # a credential-looking file into the chat. Counts (`wc -c`, `grep -c`) and key names still pass.
+  SECRET_FILE='([^[:space:]/\\]*(whoop|passw|cred|secret|token)[^[:space:]/\\]*\.txt|users[ _]data[^[:space:]]*\.txt|(^|[[:space:]/\\"'"'"'])\.env([[:space:]"'"'"']|$))'
+  if printf '%s' "$CMD" | grep -qiE "(^|[;&|(]|[[:space:]])(cat|head|tail|less|more|type|bat|Get-Content|gc|sed[[:space:]]+-n)([[:space:]][^;&|]*)?$SECRET_FILE"; then
+    echo "Blocked by guard hook: that prints a credential-looking file (whoop/password/cred/token .txt, users_data .txt, .env) into the chat. Check it with wc -c / grep -c, or read .env key names only (grep -oE '^[A-Z_]+=' .env)." >&2
+    exit 2
+  fi
+  # Added 2026-11-16 (ratchet): killing every node/python by image name takes down unrelated tools
+  # (MCP servers, other sessions); CLAUDE.md says kill leftovers by PID (`taskkill //F //T //PID <pid>`).
+  if printf '%s' "$UNQUOTED" | grep -qiE 'taskkill[^;&|]*[/-]+IM[[:space:]]+"?(node|python|pythonw)(\.exe)?|(^|[;&|[:space:]])(pkill|killall)[[:space:]]+(-[a-z0-9]+[[:space:]]+)*(node|python3?)([[:space:]]|$)|Stop-Process[^;&|]*-Name[[:space:]]+"?(node|python)'; then
+    echo "Blocked by guard hook: that kills every node/python process on the machine. Kill the leftover by PID instead (find it with netstat -ano | grep :<port>, then taskkill //F //T //PID <pid>)." >&2
+    exit 2
+  fi
   exit 0
 fi
 

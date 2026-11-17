@@ -42,5 +42,22 @@ check 0 'echo "git push --force is blocked"'
 check 0 'rm file.txt'
 check 0 'git push origin main'
 
+check 2 'head -c 1500 "users data/vered/whoop.txt"'
+check 2 'cat ~/Downloads/users_data/notes.txt'
+check 2 'cd x && cat .env'
+check 2 'sed -n 1,5p rclone-token.txt'
+check 2 'Get-Content C:\x\passwords.txt'
+check 0 "grep -oE '^[A-Z_]+=' .env"
+check 0 'wc -c "users data/vered/whoop.txt"'
+check 2 'taskkill //F //IM node.exe //FI "WINDOWTITLE eq none"'
+check 2 'taskkill /f /im python.exe'
+check 2 'pkill node'
+check 2 'Stop-Process -Name node -Force'
+check 0 'taskkill //F //T //PID 1234'
+check 0 'grep -n taskkill notes.md'
+check 0 'cat .env.example'
+check 0 'cat README.txt'
+check 0 'head -5 out/nights.csv'
+
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
