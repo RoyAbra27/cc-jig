@@ -110,3 +110,14 @@ Notes: a read-only probe script in the data-path lane found two invented-number 
 | ux | 20 | 2 | 20 (most partial: screenshots) | 4 | 1 |
 | controller | 1 | 1 | 1 | 0 | 0 |
 Notes: the adapted data-path lane earned most again, with runnable probes that made re-verification cheap (wrong-amount and wrong-number paths). A background lane found the only lock-starvation and provider-outage paths; a ux lane found trust-wording and recovery-flow problems no code lane looks at: both are worth adding for a product with scheduled jobs and a phone UI. Conformance and deploy were mostly doc hygiene on a whole-product pass (two findings changed what ships). All six lanes missed that a second pass through the main flow reset the user's earlier choices; the user found it by asking (the omissions axis for it was added the same day). One fix unit came back blocked because the controller had changed code after consolidation and its Done-when no longer matched.
+
+## 2026-11-15 Project B, learning branch (30 commits, +4.6k; every task already reviewed plus a final 2-lane review)
+Lanes: api-surface, data-path, conformance, ui (conditional, replaced deploy: no infra or dependency change), omissions; then a separate two-agent UX critique (design review + style detector) at the user's request. 41 raw -> 35 merged (15 FIX-CODE, 3 USER-DECISION, 7 FIX-DOCS, 3 DEFER, 7 DROP), 0 Critical.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| api-surface | 5 | 1 | 4 | 0 | 1 |
+| data-path | 8 | 3 | 5 | 0 | 3 |
+| conformance | 8 | 0 | 8 | 0 | 0 |
+| ui | 10 | 2 | 8 | 1 | 3 |
+| omissions | 10 | 3 | 7 | 2 | 0 |
+Notes: omissions found both unique Important decisions (learned state that only grows, no backup of the store holding it). The one merge-blocking bug (a flow dead end after its first use) was found by ui, api-surface and data-path, and again by the UX critique. The UX critique (design review) found 3 issues no lane rated Important: learned state invisible and not undoable, a verdict headline on a near-tie estimate, an overloaded choice row; the style detector found only cosmetic flags. Zero unique Important+ this run: api-surface, data-path, conformance (none has three in a row yet: each found an Important in an audit since its earlier zeros; api-surface's value here was the clean auth/CSRF evidence). Lesson: for a UI-heavy branch with a learning or explanation layer, a design-review UX lane belongs in the default set; consider merging conformance into the consolidator's pass.
