@@ -4,13 +4,13 @@
     {
       "id": 1,
       "prompt": "our landing page at apps/web/src/pages/index.tsx looks dated and kind of generic, can you redesign it? keep our logo and colors, the copy is fine",
-      "expected_output": "Captures PRODUCT.md/DESIGN.md via impeccable, runs critique, asks refine vs reinvent naming /hallmark redesign, picks refine (brand kept), asks for a clean git tree, lists Floor-vs-DESIGN.md conflicts before building, runs Hallmark redesign at restyle depth with scaffold --brand, fixes content/logic critique findings with impeccable commands or lists them, finishes with impeccable audit + screenshots at two widths. Does not run Hallmark install-hook.",
+      "expected_output": "Captures PRODUCT.md/DESIGN.md via impeccable, runs critique, asks refine vs reinvent, picks refine (brand kept), lists each brand-vs-unslop rule conflict (tracked capitals, heavy weights, italics, hue gradients) and asks per item, reads unslop SKILL.md directly (user-invoke only) and runs it in polish mode with the critique findings, shows its audit and direction before editing, lists copy changes as suggestions, fixes content/logic findings with impeccable commands, finishes with impeccable audit + viewport screenshots at two widths.",
       "files": []
     },
     {
       "id": 2,
       "prompt": "i want a totally new look for the marketing site, nothing like the current one. it's an astro site in /site. go wild but keep the pages and forms working",
-      "expected_output": "Context + critique first, user picks reinvent, reads hallmark SKILL.md and follows redesign flow, asks before renaming DESIGN.md, keeps content and wiring, ends with impeccable audit and screenshots.",
+      "expected_output": "Context + critique first, user picks reinvent, runs unslop's full process (audit, five-line direction approved on the decision page, nine passes, checklist), keeps sections, copy and form wiring, re-captures DESIGN.md with impeccable document after asking, ends with impeccable audit and screenshots.",
       "files": []
     },
     {
@@ -47,6 +47,18 @@
       "id": 8,
       "prompt": "check the settings and dashboard screens of the android app on the test phone, does anything look off?",
       "expected_output": "Uses the Android path: screenshots each screen, scrolls every scrollable screen to its end before judging, and reports a last button that sits flush against the bottom navigation or the system bar as an overflow bug; does not call a view missing before scrolling.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "build a new hebrew landing page for our sleep app, RTL, in site/he/",
+      "expected_output": "Runs impeccable context first, then unslop as a builder: reads references/rtl.md before the passes, writes the five-line direction and waits for approval, routes Hebrew copy through hebrew-copywriter, builds with the nine passes, ends with impeccable audit and screenshots at 390 and 1440. Does not run Hallmark.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "use hallmark to redesign the pricing page",
+      "expected_output": "Honors the named tool: the user named Hallmark, so it runs /hallmark redesign inside the frontend-flow steps (impeccable context and critique before, impeccable audit after) instead of unslop.",
       "files": []
     }
   ]

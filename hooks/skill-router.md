@@ -21,7 +21,7 @@ When a situation below applies, use the listed skill or agent and say so in one 
 | A large branch (15+ commits, or auth/personal data/infra/public API) is about to merge or ship, or the user says "full audit", "massive review", "what did we miss", "multiple reviewers" | `branch-audit` (parallel Opus lanes, one consolidator, user decisions, one fix wave); add `security-audit` as the security lane when auth, personal data or a public API is touched |
 | Security question, focused vuln review, "pen test", "security audit" of a codebase | `security-audit` (Cloudflare; token heavy); `/security-review` for just the pending diff |
 | Architecture or flow diagram, ERD, sequence, or a one-page explainer to share | `archify` |
-| Redesign or improve a website or landing page, Android app UX/UI, or a new marketing page | `frontend-flow` (chains impeccable, `/hallmark`, the android skills, mobile MCP); not impeccable or hallmark directly |
+| Redesign or improve a website, landing page or web dashboard, Android app UX/UI, or a new marketing page | `frontend-flow` (chains impeccable, unslop, the android skills, mobile MCP); not impeccable, unslop or hallmark directly |
 | "Improve the architecture", find refactor/deepening opportunities across a repo | `/improve-codebase-architecture` (user-invoked) |
 | Steps only the user can do (cloud console, secrets, CI setup, cutover) | `wizard` to generate a guided bash script, instead of a long prose checklist |
 | About to say "done", "fixed", "passing" | superpowers:verification-before-completion: run the command, paste the output |
