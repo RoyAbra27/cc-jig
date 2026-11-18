@@ -13,6 +13,8 @@
 !/README.md
 !/LICENSE
 /skills/*-workspace/
+# Local eval runs (prompts, graders, HTML reports): never published
+evals-cc/
 __pycache__/
 # Third-party skills and agents: installed from upstream by bootstrap.sh, credited in README.md
 /skills/archify/

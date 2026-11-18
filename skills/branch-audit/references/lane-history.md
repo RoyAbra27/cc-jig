@@ -121,3 +121,15 @@ Lanes: api-surface, data-path, conformance, ui (conditional, replaced deploy: no
 | ui | 10 | 2 | 8 | 1 | 3 |
 | omissions | 10 | 3 | 7 | 2 | 0 |
 Notes: omissions found both unique Important decisions (learned state that only grows, no backup of the store holding it). The one merge-blocking bug (a flow dead end after its first use) was found by ui, api-surface and data-path, and again by the UX critique. The UX critique (design review) found 3 issues no lane rated Important: learned state invisible and not undoable, a verdict headline on a near-tie estimate, an overloaded choice row; the style detector found only cosmetic flags. Zero unique Important+ this run: api-surface, data-path, conformance (none has three in a row yet: each found an Important in an audit since its earlier zeros; api-surface's value here was the clean auth/CSRF evidence). Lesson: for a UI-heavy branch with a learning or explanation layer, a design-review UX lane belongs in the default set; consider merging conformance into the consolidator's pass.
+
+## 2026-11-17 Project A client, UI polish branch (8 commits, +3.0k; no API, infra or dependency change)
+Lanes: data-path, ui-ux, performance (measured baseline given), simplification (user asked), conformance, omissions; api-surface and deploy skipped (nothing exposed, no deps). 49 raw -> 48 merged (23 FIX-CODE, 5 FIX-DOCS, 3 USER-DECISION, 16 DEFER, 1 DROP), 0 Critical.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| data-path | 7 | 0 | 7 | 0 | 0 |
+| ui-ux | 11 | 0 | 9 | 1 | 0 |
+| performance | 7 | 1 | 6 | 0 | 0 |
+| simplification | 13 | 0 | 12 | 0 | 0 |
+| conformance | 5 | 0 | 4 | 0 | 1 |
+| omissions | 6 | 1 | 5 | 2 | 0 |
+Notes: ui-ux found the only merge-blocking bug (a state reset missing on a second pass through a screen, reachable two ways) by walking view states, which no other lane does; the second-pass axis paid off again. Omissions found a rollback rule made unsafe by a schema bump and a missing crash-report channel. Simplification and performance were precise but Minor-only, as predicted for a ponytail-style lane; performance with a measured baseline mostly confirmed it. The consolidator moved two "decision" candidates to FIX-DOCS because one option was already ruled out by a standing rule or decision: give the consolidator the standing rules. Zero unique Important+ this run: data-path, performance, simplification, conformance.
