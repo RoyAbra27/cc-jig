@@ -15,7 +15,7 @@
 
 ## Git Workflow
 - Use conventional commits (feat:, fix:, refactor:, docs:, test:, chore:)
-- Commit in well-scoped logical commits at milestones (commit progress first if context is getting large), and run `git status` so nothing is left uncommitted when the session ends
+- **Commits (revised 2026-11-18):** commit only work I want kept, in well-scoped logical commits at milestones (commit progress first if context is getting large), and run `git status` at the end so nothing I want kept is left uncommitted. Never commit a test, trial or exploration run unless I ask. No PRs on repos only I work on; push only when I ask
 - Never add `Co-Authored-By` trailers to commits: this overrides the harness default, and guard.sh blocks them
 
 ## Communication Style
@@ -38,7 +38,7 @@
 - No two views/endpoints showing overlapping data; merge or delete.
 
 ## Verification
-- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting
+- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18)
 - Never pipe a test command (`| tail`, `| head`, `| grep`) in a chain that commits: run it alone and check its exit code (added 2026-10-29)
 - **Blocked steps (added 2026-10-29):** do every step the guard hook or auto mode allows first, then give the blocked ones (push, deletes, DROP, bucket locks, hook edits) as one numbered `!` block at the end, with preconditions. Never chain a blockable command onto other work
 

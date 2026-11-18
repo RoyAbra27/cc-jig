@@ -31,6 +31,15 @@
             "command": "bash -c '\"$HOME/.claude/hooks/plan-redteam-gate.sh\"'"
           }
         ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '\"$HOME/.claude/hooks/no-questions.sh\"'"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -93,6 +102,16 @@
             "command": "[ ! -f \"$HOME/.claude/skills/impeccable/scripts/impeccable\" ] || \"$HOME/.claude/skills/impeccable/scripts/impeccable\" hook",
             "timeout": 30,
             "statusMessage": "Design deep pass"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '\"$HOME/.claude/hooks/no-questions.sh\"'"
           }
         ]
       }

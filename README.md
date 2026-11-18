@@ -51,7 +51,8 @@ bootstrap.sh       new-machine setup
 |---|---|---|
 | [`guard.sh`](hooks/guard.sh) | before Edit, Write, Bash, PowerShell | Blocks `rm -rf` (except SDD scratch under `.superpowers/sdd/`), force-push, `reset --hard` and other work-destroying git commands, `DROP`/`TRUNCATE`, bot attribution trailers, secret-shaped strings in commits, edits to secrets files, lockfiles and `.git/` internals, and em-dashes in written files (the session scratchpad is exempt). Blocks everything if `jq` is missing rather than failing open. Tests: `bash hooks/guard.test.sh` |
 | [`plan-redteam-gate.sh`](hooks/plan-redteam-gate.sh) | before ExitPlanMode; after Edit, Write | Blocks leaving plan mode until the plan has had a red-team pass (or an explicit, reasoned opt-out). After an edit to a `docs/superpowers/plans/` or `specs/` file, it reminds Claude to red-team it first |
-| [`session-context.sh`](hooks/session-context.sh) | session start, resume, clear, compact, fork | Injects working state from the repo itself (branch, uncommitted files, recent commits) plus the skill router |
+| [`session-context.sh`](hooks/session-context.sh) | session start, resume, clear, compact, fork | Injects working state from the repo itself (branch, uncommitted files, recent commits) plus the skill router. When the weekly setup review is due, also shows the user a one-line notice |
+| [`no-questions.sh`](hooks/no-questions.sh) | each prompt; before AskUserQuestion | A prompt saying "don't ask questions" (English or Hebrew) flags the session, and AskUserQuestion is then denied so Claude decides and names its choice. "you can ask" clears it |
 | [`lint-on-save.sh`](hooks/lint-on-save.sh) | after Edit, Write | Runs the project's own prettier and eslint on TS/JS files. Never blocks |
 
 `settings.json` also wires Impeccable's own hook (after Edit/Write, at session start, at stop). It no-ops when Impeccable isn't installed.
