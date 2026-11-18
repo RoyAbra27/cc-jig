@@ -133,3 +133,14 @@ Lanes: data-path, ui-ux, performance (measured baseline given), simplification (
 | conformance | 5 | 0 | 4 | 0 | 1 |
 | omissions | 6 | 1 | 5 | 2 | 0 |
 Notes: ui-ux found the only merge-blocking bug (a state reset missing on a second pass through a screen, reachable two ways) by walking view states, which no other lane does; the second-pass axis paid off again. Omissions found a rollback rule made unsafe by a schema bump and a missing crash-report channel. Simplification and performance were precise but Minor-only, as predicted for a ponytail-style lane; performance with a measured baseline mostly confirmed it. The consolidator moved two "decision" candidates to FIX-DOCS because one option was already ruled out by a standing rule or decision: give the consolidator the standing rules. Zero unique Important+ this run: data-path, performance, simplification, conformance.
+
+## 2026-11-18 Project A client, tester-feedback fix branch (7 commits, +0.8k; no API, infra or dependency change)
+Lanes: data-path, ui-ux, conformance, omissions, then cleanup added on request (dead code, stale comments, simplification, performance in touched files); api-surface and deploy skipped (nothing exposed, no deps). 36 raw -> 32 merged (5 FIX-CODE, 2 USER-DECISION, 5 FIX-DOCS, 18 DEFER, 2 DROP), 1 Critical.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| data-path | 5 | 2 | 3 | 0 (shared the Critical) | 1 |
+| ui-ux | 10 | 2 | 8 | 1 | 1 |
+| conformance | 7 | 4 | 3 | 0 | 0 |
+| omissions | 7 | 3 | 4 | 0 (shared the Critical) | 0 |
+| cleanup | 7 | 0 | 6 | 0 | 0 |
+Notes: the only Critical was pre-existing code reachable from a new angle (an entry point that stays open while a long-running mode is active), found independently by data-path and omissions; data-path had the right mechanism. ui-ux again found the unique Important by walking the second pass through a control (an action repeated in the same burst). A copy rule enforced by a test was broken in a resource type the test did not read (plurals); two lanes caught it, so ask lanes to check what each guard test actually parses. Cleanup was Nit-only, as predicted for a ponytail-style lane: fold it into the code lanes' closing section unless the user asks. Zero unique Important+ this run: data-path, conformance, omissions, cleanup (conformance: second run in a row; consider merging it into the consolidator per the earlier note).

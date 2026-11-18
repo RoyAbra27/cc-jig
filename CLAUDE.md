@@ -40,7 +40,7 @@
 ## Verification
 - For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18)
 - Never pipe a test command (`| tail`, `| head`, `| grep`) in a chain that commits: run it alone and check its exit code (added 2026-10-29)
-- **Blocked steps (added 2026-10-29):** do every step the guard hook or auto mode allows first, then give the blocked ones (push, deletes, DROP, bucket locks, hook edits) as one numbered `!` block at the end, with preconditions. Never chain a blockable command onto other work
+- **Blocked steps (added 2026-10-29):** do every step the guard hook or auto mode allows first, then give the blocked ones (push, deletes, DROP, bucket locks, hook edits) as one numbered `!` block at the end, with preconditions. Never chain a blockable command onto other work. Before offering a step that discards work (`reset --hard`, `branch -D`, `checkout -- .`, force push), run `git status` and `git log` on that repo and say what it would drop (added 2026-11-18)
 
 ## Ratchet (added 2026-09-01)
 - Every repeated correction becomes permanent infrastructure, fixed at the strongest layer available: in-chat correction < CLAUDE.md rule < hook/linter that blocks it (~/.claude/hooks/guard.sh). If I correct the same mistake a 3rd time, propose the hook conversion - the 4th time should never happen

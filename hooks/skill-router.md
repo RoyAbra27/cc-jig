@@ -5,7 +5,7 @@ When a situation below applies, use the listed skill or agent and say so in one 
 | Situation | Reach for |
 |---|---|
 | New feature, behavior change, "let's build X", "add an endpoint/module/flow" | superpowers:brainstorming first; `buy-vs-build` the moment a known category appears; `testing-workflow` (spec first) before implementation |
-| Bug, failing test, unexpected behavior, "it doesn't work" | `debugging-protocol` first (scaled by risk); superpowers:systematic-debugging once its full protocol applies; then `testing-workflow` (failing repro test), then verification-before-completion |
+| Bug, failing test, unexpected behavior, "it doesn't work", "why is X happening/playing/showing" | `debugging-protocol` first (scaled by risk); superpowers:systematic-debugging once its full protocol applies; then `testing-workflow` (failing repro test), then verification-before-completion |
 | About to write a queue, retry/backoff, scheduler/cron, parser, auth/RBAC, cache, rate limiter, export, or event bus | `buy-vs-build` (it dispatches the `library-scout` agent) |
 | I proposed a plan or architecture that is expensive or hard to reverse, or the user says "are you sure", "double check", "second opinion" | `consult` (it dispatches `consult-side` agents) for a choice between options |
 | A written spec or implementation plan is finished and about to be executed, or the user says "red team", "attack/poke holes in this plan", "team lead review" | `plan-redteam` (it dispatches `plan-redteam-lead`, then you defend each attack with evidence); `plan-redteam-gate.sh` blocks ExitPlanMode without it |
