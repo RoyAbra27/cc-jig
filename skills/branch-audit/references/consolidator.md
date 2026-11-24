@@ -12,6 +12,7 @@ Write ONE file `<workspace>/audit-merged.md` with:
    - Re-verify every Critical/Important and every FIX-CODE item yourself at HEAD. Spot-check external claims that would change code (record URLs). Mark what you could not verify.
    - Order by bucket, then severity.
 2. `## Fix-wave brief draft`: FIX-CODE + FIX-DOCS grouped into coherent work units (files touched, tests to add), ordered with data-loss paths first, executable by one implementer.
-3. `## Lane statistics`: per lane: raw findings, duplicates, unique verified, unique Important+, dropped; plus a 3-line judgement of which lanes earned their cost.
+3. `## Conformance`: the checklist in `~/.claude/skills/branch-audit/references/lanes.md` under "conformance" (requirement table, rulings, known-open triage, doc sync, drifting constants). New issues it finds become merged findings with source `consolidator`.
+4. `## Lane statistics`: per lane: raw findings, duplicates, unique verified, unique Important+, dropped; plus a 3-line judgement of which lanes earned their cost.
 
 Reply with ONLY: file path, counts per bucket, and USER-DECISION titles (one line each)."

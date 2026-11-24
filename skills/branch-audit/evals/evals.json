@@ -5,7 +5,7 @@
     {
       "id": 1,
       "prompt": "ok the branch is done, 38 commits, api + worker + terraform. lets dispatch some opus reviewers of multiple kinds, security, architecture, simplification, i want a massive audit of everything we did, dont be hesitant about tokens",
-      "expected_output": "Packages the branch once (filtered diff file outside the repo) and a known-open list; writes one shared brief from the template; dispatches the always-on lanes (api-surface, data-path, conformance, deploy, omissions) in ONE message on Opus in the background, adding client-contract/privacy only if the branch warrants; relays each lane's Important titles as it returns; dispatches one consolidator; verifies top items at file:line itself; asks USER-DECISION items via AskUserQuestion with a recommendation first; no code edited before the user decides; one fix wave then one scoped re-review.",
+      "expected_output": "Packages the branch once (filtered diff file outside the repo) and a known-open list; writes one shared brief from the template; dispatches the always-on lanes (api-surface, data-path, deploy, omissions) in ONE message on Opus in the background, adding client-contract/privacy only if the branch warrants; relays each lane's Important titles as it returns; dispatches one consolidator; verifies top items at file:line itself; asks USER-DECISION items via AskUserQuestion with a recommendation first; no code edited before the user decides; one fix wave then one scoped re-review.",
       "files": [],
       "assertions": [
         "branch diff package written to a git-ignored or temp workspace, never a tracked path, lockfiles/generated files excluded",
@@ -14,7 +14,7 @@
         "all lanes dispatched in a single message with model opus and run_in_background",
         "no more than 7 lanes dispatched; no standalone ponytail lane unless the user asked for simplification only",
         "omissions lane dispatched",
-        "exactly one consolidator dispatched after all lanes returned",
+        "exactly one consolidator dispatched after all lanes returned, and its prompt includes the conformance pass; no separate conformance lane",
         "controller reads at least the top Important items at their cited file:line before presenting",
         "USER-DECISION items asked via AskUserQuestion with the recommended option first",
         "no repo file edited by the controller or lanes before the user answers (git status clean apart from the workspace)",

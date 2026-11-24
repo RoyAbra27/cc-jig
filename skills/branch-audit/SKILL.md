@@ -1,6 +1,6 @@
 ---
 name: branch-audit
-description: Full multi-lane audit of a whole feature branch before merge or first deploy - parallel Opus reviewers for the API surface, the data path, spec conformance, deploy and supply chain, the client contract, privacy, and omissions (what nobody thought to build), then one consolidated, verified list with user decisions and a single fix wave. Use when a large branch (roughly 15+ commits, or anything touching auth, personal data, payments, infra or a public API) is about to merge or ship, at the end of subagent-driven-development instead of a single final reviewer when the user wants depth, and whenever the user says "full audit", "massive review", "review everything", "audit the branch", "multiple reviewers", "what did we miss", or "don't be hesitant about tokens". Not for a small diff (use /code-review or ponytail-review) and not for a plan before execution (use plan-redteam).
+description: Full multi-lane audit of a whole feature branch before merge or first deploy - parallel Opus reviewers for the API surface, the data path, deploy and supply chain, the client contract, privacy, and omissions (what nobody thought to build), then one consolidator that checks spec conformance and produces a verified list with user decisions and a single fix wave. Use when a large branch (roughly 15+ commits, or anything touching auth, personal data, payments, infra or a public API) is about to merge or ship, at the end of subagent-driven-development instead of a single final reviewer when the user wants depth, and whenever the user says "full audit", "massive review", "review everything", "audit the branch", "multiple reviewers", "what did we miss", or "don't be hesitant about tokens". Not for a small diff (use /code-review or ponytail-review) and not for a plan before execution (use plan-redteam).
 ---
 
 # Branch audit
@@ -19,12 +19,12 @@ Cost: about 130-230k tokens per lane on Opus, ~1-1.5M per audit. Say so before d
 Fill `references/brief-template.md` into a file next to the package. It carries the system summary, inputs, hard rules (read-only, no tests that reset shared DBs, no secrets or real data printed, no subagents) and the fixed finding format. Every lane reads it first; the lane prompt adds only scope.
 
 ### 3. Pick lanes and dispatch in one message
-Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `conformance`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Dispatch all chosen lanes in ONE message, background, `model: opus`, general-purpose; when the backend framework has a file in `~/.claude/skills/backend-api/references/` (e.g. `nestjs.md`), tell the `api-surface` lane to read it. Each writes `audit-<lane>.md` and replies with counts and Important+ titles only.
+Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Dispatch all chosen lanes in ONE message, background, `model: opus`, general-purpose; when the backend framework has a file in `~/.claude/skills/backend-api/references/` (e.g. `nestjs.md`), tell the `api-surface` lane to read it. Each writes `audit-<lane>.md` and replies with counts and Important+ titles only.
 
 While they run, relay each completion to the user in two or three lines: counts, and the Important titles in plain words. Don't wait silently for all of them.
 
 ### 4. Consolidate
-When all lanes are back, dispatch one Opus consolidator with `references/consolidator.md`. It merges duplicates, re-verifies every Important+ and every code fix against HEAD, buckets items (FIX-CODE, USER-DECISION, FIX-DOCS, DEFER, DROP), drafts the fix-wave units, and writes lane statistics.
+When all lanes are back, dispatch one Opus consolidator with `references/consolidator.md`. It merges duplicates, re-verifies every Important+ and every code fix against HEAD, buckets items (FIX-CODE, USER-DECISION, FIX-DOCS, DEFER, DROP), drafts the fix-wave units, writes lane statistics, and does the conformance pass.
 
 ### 5. Decide with the user
 - Put every USER-DECISION to the user with AskUserQuestion: the options, your recommendation first, the cost of each in one line.

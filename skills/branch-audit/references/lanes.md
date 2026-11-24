@@ -19,13 +19,11 @@ Attacker and correctness view of every externally reachable entry point.
 - Migrations: constraints vs states, indexes for every query the code runs, role grants (least privilege), PG-version specifics.
 - Backups and restore on paper; what a human sees when a job fails (exit codes, logs, alerts).
 
-## conformance (always)
-- Table: every spec requirement and plan global constraint -> implemented / deviated (cite the ruling) / missing.
+## conformance (done by the consolidator; a separate lane only when the user asks)- Table: every spec requirement and plan global constraint -> implemented / deviated (cite the ruling) / missing.
 - Every ruling in the ledger reflected in code and docs; contradictions between rulings; challenge controller rulings with evidence (user rulings are binding).
 - Triage every known-open item: must-fix-before-merge / fix-later / drop.
 - Doc sync: CLAUDE.md commands, runbooks, env examples, spec vs actual behaviour; banned style (e.g. em-dashes) in changed files.
 - Constants duplicated across languages/services that can drift (list both locations).
-Keep findings short: this lane's findings are mostly duplicates of other lanes; its table and triage are the value.
 
 ## deploy (always, when the branch ships infra, images or dependencies)
 - Dependency advisories (`npm audit`, lockfile versions vs OSV), unnecessary new deps.
