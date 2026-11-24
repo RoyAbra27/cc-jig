@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# New-machine setup for this Claude Code config. Run from Git Bash after:
+# New-machine setup for this Claude Code config (Windows via winget, macOS via Homebrew). Run from Git Bash or a Mac terminal after:
 #   install Claude Code, then: git clone <this repo> ~/.claude && claude   (log in once, then quit)
 # Safe to rerun: installed items are skipped, overwritten dotfiles get a .bak copy.
 # Usage: bash ~/.claude/bootstrap.sh                      install everything, pick third-party skills interactively
@@ -9,8 +9,14 @@ set -uo pipefail
 REPO="$HOME/.claude"
 SKILLS=""
 [ "${1:-}" = "--skills" ] && SKILLS="${2:?--skills needs all, none or a list like 1,2,5}"
+case "$(uname -s)" in
+  Darwin) OS=mac ;;
+  MINGW*|MSYS*|CYGWIN*) OS=windows ;;
+  *) OS=linux ;;
+esac
 
 if [ "${1:-}" = "--capture" ]; then
+  [ "$OS" = windows ] || { echo "--capture copies the PowerShell profile, so it is Windows-only."; exit 1; }
   cp "$(pwsh -NoProfile -Command '$PROFILE' | tr -d '\r')" "$REPO/dotfiles/"
   cp "$HOME/.oh-my-posh/clean-detailed.omp.json" "$REPO/dotfiles/"
   git -C "$REPO" status --short dotfiles
@@ -20,20 +26,37 @@ fi
 step() { printf '\n== %s\n' "$1"; }
 missing=()
 
-step "winget packages"
-for id in Git.Git Microsoft.PowerShell astral-sh.uv GitHub.cli jqlang.jq OpenJS.NodeJS.LTS \
-          JanDeDobbeleer.OhMyPosh sharkdp.fd ZedIndustries.Zed rtk-ai.rtk; do
-  if winget list --id "$id" -e --accept-source-agreements >/dev/null 2>&1; then
-    echo "ok        $id"
-  else
-    winget install --id "$id" -e --silent --accept-package-agreements --accept-source-agreements \
-      && echo "installed $id" || missing+=("winget $id")
-  fi
-done
+if [ "$OS" = windows ]; then
+  step "winget packages"
+  for id in Git.Git Microsoft.PowerShell astral-sh.uv GitHub.cli jqlang.jq OpenJS.NodeJS.LTS \
+            JanDeDobbeleer.OhMyPosh sharkdp.fd ZedIndustries.Zed rtk-ai.rtk; do
+    if winget list --id "$id" -e --accept-source-agreements >/dev/null 2>&1; then
+      echo "ok        $id"
+    else
+      winget install --id "$id" -e --silent --accept-package-agreements --accept-source-agreements \
+        && echo "installed $id" || missing+=("winget $id")
+    fi
+  done
+elif [ "$OS" = mac ]; then
+  step "Homebrew packages"
+  command -v brew >/dev/null || { echo "Install Homebrew first (https://brew.sh), then rerun this script."; exit 1; }
+  # PowerShell and oh-my-posh are left out: they only serve the Windows PowerShell profile
+  for f in git uv gh jq node fd rtk; do
+    if brew list --formula "$f" >/dev/null 2>&1; then echo "ok        $f"
+    else brew install "$f" && echo "installed $f" || missing+=("brew $f"); fi
+  done
+  if brew list --cask zed >/dev/null 2>&1; then echo "ok        zed"
+  else brew install --cask zed && echo "installed zed" || missing+=("brew zed"); fi
+else
+  step "packages"
+  echo "Install git, uv, gh, jq, node, fd and rtk with your package manager; this script checks for them next."
+fi
 
-for bin in pwsh uv npx claude jq; do
+BINS="uv npx claude jq"
+[ "$OS" = windows ] && BINS="pwsh $BINS"
+for bin in $BINS; do
   if ! command -v "$bin" >/dev/null; then
-    echo "$bin is not on PATH yet (fresh winget installs need a new terminal). Open a new Git Bash and rerun this script."
+    echo "$bin is not on PATH yet (fresh installs often need a new terminal). Open a new terminal and rerun this script."
     exit 1
   fi
 done
@@ -42,19 +65,24 @@ step "uv tools"
 # markitdown[all] needs an Azure pre-release dependency, so list the extras explicitly
 uv tool install "markitdown[pdf,docx,pptx,xlsx,xls,outlook,audio-transcription,youtube-transcription]" || missing+=("uv markitdown")
 
-step "PowerShell modules"
-pwsh -NoProfile -Command 'Install-Module posh-git,PSFzf,Terminal-Icons -Scope CurrentUser -Force -AcceptLicense' \
-  || missing+=("pwsh modules")
+if [ "$OS" = windows ]; then
+  step "PowerShell modules"
+  pwsh -NoProfile -Command 'Install-Module posh-git,PSFzf,Terminal-Icons -Scope CurrentUser -Force -AcceptLicense' \
+    || missing+=("pwsh modules")
 
-step "dotfiles"
-PROFILE_PS="$(pwsh -NoProfile -Command '$PROFILE' | tr -d '\r')"
-mkdir -p "$(dirname "$PROFILE_PS")" "$HOME/.oh-my-posh"
-for target in "$PROFILE_PS" "$HOME/.oh-my-posh/clean-detailed.omp.json"; do
-  [ -f "$target" ] && cp "$target" "$target.bak-$(date +%Y%m%d%H%M%S)"
-done
-cp "$REPO/dotfiles/Microsoft.PowerShell_profile.ps1" "$PROFILE_PS"
-cp "$REPO/dotfiles/clean-detailed.omp.json" "$HOME/.oh-my-posh/"
-echo "profile -> $PROFILE_PS"
+  step "dotfiles"
+  PROFILE_PS="$(pwsh -NoProfile -Command '$PROFILE' | tr -d '\r')"
+  mkdir -p "$(dirname "$PROFILE_PS")" "$HOME/.oh-my-posh"
+  for target in "$PROFILE_PS" "$HOME/.oh-my-posh/clean-detailed.omp.json"; do
+    [ -f "$target" ] && cp "$target" "$target.bak-$(date +%Y%m%d%H%M%S)"
+  done
+  cp "$REPO/dotfiles/Microsoft.PowerShell_profile.ps1" "$PROFILE_PS"
+  cp "$REPO/dotfiles/clean-detailed.omp.json" "$HOME/.oh-my-posh/"
+  echo "profile -> $PROFILE_PS"
+else
+  step "PowerShell modules and dotfiles"
+  echo "skipped (they configure the Windows PowerShell profile)"
+fi
 
 step "MCP servers (user scope, stored in ~/.claude.json)"
 add_mcp() {

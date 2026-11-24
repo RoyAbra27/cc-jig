@@ -95,7 +95,7 @@ bootstrap.sh       new-machine setup
 
 ## Install
 
-On Windows 11 with Git Bash. Install Claude Code but don't start it yet (the first start creates `~/.claude`, and the clone needs that folder not to exist). Then:
+On Windows 11 with Git Bash, or macOS (see below). Install Claude Code but don't start it yet (the first start creates `~/.claude`, and the clone needs that folder not to exist). Then:
 
 ```bash
 git clone https://github.com/RoyAbra27/claude-config ~/.claude
@@ -107,7 +107,7 @@ The script installs CLI tools (winget, uv), PowerShell modules, the dotfiles, th
 
 Already have a `~/.claude`? Don't clone over it. Copy the pieces you want instead: `hooks/guard.sh` and its `settings.json` entry work on their own.
 
-On macOS or Linux, skip `bootstrap.sh` and the dotfiles (both are Windows-only). Install `jq` (`brew install jq`), which the hooks need, and run `bash ~/.claude/scripts/install-skills.sh` for the third-party skills. The hooks are plain bash, and CI runs `hooks/guard.test.sh` and `hooks/smoke.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
+On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/bootstrap.sh`: it installs the tools with Homebrew instead of winget and skips the PowerShell modules and dotfiles. On Linux it checks for the tools instead of installing them. The hooks are plain bash, and CI runs `hooks/guard.test.sh` and `hooks/smoke.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
 
 ### Make it yours
 
@@ -136,7 +136,7 @@ Update my Claude Code setup from https://github.com/RoyAbra27/claude-config (bra
 3. Show what is new: fetch my upstream, then show git log --oneline HEAD..<upstream>/main and a diff --stat, summarized in plain words.
 4. Update: git rebase <upstream>/main. On a conflict, keep the upstream change and re-apply my intent on top of it; if you can't tell what I meant, stop and ask me. Never use reset --hard, never force-push, never delete my commits.
 5. Copied pieces only: compare each file I have against the temp clone, show me what changed per file, and update only the files I approve. Keep my edits by merging them in, not by overwriting.
-6. If the update touched bootstrap.sh, scripts/install-skills.sh or .gitignore: on Windows rerun bash ~/.claude/bootstrap.sh; on macOS or Linux never run bootstrap.sh (it is Windows-only), run bash ~/.claude/scripts/install-skills.sh --dry-run, show me the list, and run it without --dry-run for the skills I pick. Both skip what is already installed.
+6. If the update touched bootstrap.sh, scripts/install-skills.sh or .gitignore, rerun bash ~/.claude/bootstrap.sh (Windows and macOS; it skips what is already installed and asks which third-party skills I want).
 7. Check it works: jq empty ~/.claude/settings.json, then bash ~/.claude/hooks/guard.test.sh and bash ~/.claude/hooks/smoke.test.sh must both print "all cases pass".
 8. Report: what is new, which of my changes were kept and where, anything I need to do (usually: restart Claude Code to load new hooks and skills).
 ````
