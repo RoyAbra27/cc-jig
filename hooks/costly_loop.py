@@ -159,7 +159,8 @@ def slow_list(cwd, now, bg_ms):
     rows = slow_steps(mem, bg_ms)[:8]
     if not rows:
         return ""
-    items = "; ".join("`%s` (~%ds, e.g. `%s`)" % (k, avg / 1000, v.get("example", "")[:80]) for avg, k, v in rows)
+    items = "; ".join("`%s` (~%ds%s)" % (k, avg / 1000, "" if v.get("example", "") in ("", k)
+                                          else ", e.g. `%s`" % v["example"][:80]) for avg, k, v in rows)
     return ("In this repo these steps usually take %ds or more; start them with run_in_background: true and keep "
             "working: %s. After a call moves to the background, wait for its notification before git or install "
             "steps on the same tree." % (bg_ms / 1000, items))

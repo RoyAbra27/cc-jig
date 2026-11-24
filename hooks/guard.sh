@@ -67,7 +67,7 @@ $(git diff HEAD -U0 2>/dev/null)"
   if printf '%s' "$CMD" | grep -qE '(python[0-9.]*|node)([[:space:]][^|;&<]*)?<<'; then
     HEREDOC_BODY=$(printf '%s\n' "$CMD" | awk 'f { print } /<</ { f = 1 }')
     if printf '%s' "$HEREDOC_BODY" | grep -qF '\'; then
-      echo "Blocked by guard hook: a heredoc fed to python/node contains a backslash, which Git Bash can mangle (CLAUDE.md). Write the script to a file with the Write tool and run the file." >&2
+      echo "Blocked by guard hook: a heredoc fed to python/node contains a backslash, which Git Bash can mangle. Write the script to a file with the Write tool and run the file." >&2
       exit 2
     fi
   fi

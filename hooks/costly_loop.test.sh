@@ -138,6 +138,8 @@ pre 0 'polling loops are never bounced' 'until [ -f done ]; do sleep 1; done'
 LIST=$(CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$REPO")
 printf '%s' "$LIST" | grep -q 'npm run verify:core' || { echo "FAIL: slow list misses verify:core: $LIST"; FAIL=1; }
 printf '%s' "$LIST" | grep -q 'npm run build' && { echo "FAIL: slow list includes a mixed step"; FAIL=1; }
+printf '%s' "$LIST" | grep -q 'verify:core` (~71s)' || { echo "FAIL: an example identical to its key is repeated: $LIST"; FAIL=1; }
+printf '%s' "$LIST" | grep -q 'e.g. `uv run pytest -q tests/b`' || { echo "FAIL: a differing example is missing: $LIST"; FAIL=1; }
 [ -z "$(CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$TMP/elsewhere")" ] || { echo "FAIL: list for a repo with no history"; FAIL=1; }
 [ -z "$(CL_NOW=$((T + 31 * 86400)) "$PY" "$DIR/costly_loop.py" --slow-list "$REPO")" ] || { echo "FAIL: 30-day prune"; FAIL=1; }
 
