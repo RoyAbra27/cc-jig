@@ -92,7 +92,15 @@ def main():
         open(log_path, "a", encoding="utf-8").write(json.dumps(rec) + "\n")
 
     if event != "PreToolUse":
-        if tool == "Bash" and not inp.get("run_in_background") and kind(inp.get("command", "")) == "other":
+        # Runs are recorded here, not in Pre: another PreToolUse hook (guard.sh) may still block the call.
+        k = kind(inp.get("command", "")) if tool == "Bash" else None
+        if k == "install":
+            st["last_install"] = now
+            save()
+        elif k == "full_render" and FINAL_RE.search(inp.get("command", "")):
+            st["last_final"] = now
+            save()
+        elif k == "other" and not inp.get("run_in_background"):
             # A fast run clears its segments, so a cheap step chained once onto a slow pipeline stops counting.
             slow = (d.get("duration_ms") or 0) >= slow_ms
             for s in segments(inp.get("command", "")):
@@ -137,7 +145,6 @@ def main():
         if st["last_final"] is not None and now - st["last_final"] < FINAL_WINDOW:
             return block("render", "a second `# final` render within 20 minutes is a loop. Send the user the last "
                          "one, or render only the changed span.")
-        st["last_final"] = now
         allow("render", "final")
     elif k == "install":
         if st["last_install"] is None:
@@ -150,7 +157,6 @@ def main():
             return block("install", "another device install with no diagnosis since the last one. Read the code or "
                          "theme that decides what you are changing, or run a screenshot test, first. Or add a line "
                          "`# expect: <what the screen will show and why>` (20+ chars, new text).")
-        st["last_install"] = now
     elif k == "other" and not inp.get("run_in_background"):
         hit = sorted(s for s in segments(cmd) if s in st["slow"])
         if hit:

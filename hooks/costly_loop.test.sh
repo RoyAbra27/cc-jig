@@ -29,6 +29,8 @@ pre 2 'full render blocks' 'npx -y hyperframes@0.9.86 render -o full.mp4'
 pre 2 'mid-line final does not count' 'npx hyperframes render -o full.mp4 # final'
 pre 0 'final on its own line passes' 'npx hyperframes render -o full.mp4
 # final'
+post 'npx hyperframes render -o full.mp4
+# final' 90000
 pre 2 'second final within 20 min blocks' 'npx hyperframes render -o full2.mp4
 # final'
 T=$((T + 1300))
@@ -42,19 +44,24 @@ EOF"
 
 # Installs
 SID=i1
-pre 0 'first install passes' 'cd app && ./gradlew :app:installDebug -q'
+pre 0 'install another hook then blocks (never runs)' './gradlew installDebug -q'
+pre 0 'first install that actually runs passes' 'cd app && ./gradlew :app:installDebug -q'
+post 'cd app && ./gradlew :app:installDebug -q' 30000
 pre 2 'blind second install blocks' './gradlew installDebug -q'
 read_ /x/shot.png
 pre 2 'png Read is not a diagnosis' './gradlew installDebug -q'
 read_ /x/app/src/main/res/values/themes.xml
 pre 0 'install after a source Read passes' './gradlew installDebug -q'
+post './gradlew installDebug -q' 30000
 pre 2 'short expect blocks' './gradlew installDebug -q
 # expect: blue header'
 pre 0 'valid expect passes' './gradlew installDebug -q
 # expect: header turns #1E3A8A because colorPrimary now wins'
+post './gradlew installDebug -q' 30000
 pre 2 'repeated expect text blocks' './gradlew installDebug -q
 # expect: header turns #1E3A8A because colorPrimary now wins'
 pre 0 'install after a screenshot test passes' './gradlew verifyRoborazziDebug && ./gradlew installDebug'
+post './gradlew verifyRoborazziDebug && ./gradlew installDebug' 30000
 pre 0 'adb uninstall passes' 'adb uninstall com.example.app'
 pre 0 'install named in a commit message passes' 'git commit -m "fix: installDebug flake"'
 pre 2 'module-prefixed adb install blocks' 'adb -s emulator-5554 install app.apk'
