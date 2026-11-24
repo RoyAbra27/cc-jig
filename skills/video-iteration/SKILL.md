@@ -41,7 +41,7 @@ Join TTS takes only at a sentence boundary (acrossfade ~0.12 s, level matched). 
 
 ## 5. A version to send
 
-Only now render the whole video, master it, and run every check on the master:
+Only now render the whole video, master it, and run every check on the master. Put `# final` on its own line in the full-render command: the costly-loop gate blocks a full render without it.
 
 ```bash
 ffmpeg -i full.mp4 -af loudnorm=I=-14:TP=-2.2:LRA=11 -c:v copy -c:a aac -b:a 192k full-m.mp4

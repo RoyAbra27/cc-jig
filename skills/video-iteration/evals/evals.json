@@ -3,8 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "The logo in the last 6 seconds of the launch film looks stuck, can you fix it? Project is a HyperFrames folder, end card is compositions/s7-close.html starting at 56.1 s of a 62 s film.",
-      "expected_output": "Reads s7-close.html and snapshots the end card before editing, names a measurable cause (e.g. the outline appears complete in one frame, nothing moves after the fill). Renders only the end-card span with render --start/--end, runs frame_diff.py on it and reports POP/STALL numbers. Does not do a full 62 s render to check the fix; does one full render + loudness check only when sending.",
+      "prompt": "The logo in the last 5 seconds of the launch film looks stuck, can you fix it? Project is a HyperFrames folder, end card is compositions/end-card.html starting at 40 s of a 45 s film.",
+      "expected_output": "Reads end-card.html and snapshots the end card before editing, names a measurable cause (e.g. the outline appears complete in one frame, nothing moves after the fill). Renders only the end-card span with render --start/--end, runs frame_diff.py on it and reports POP/STALL numbers. Does not do a full 45 s render to check the fix; does one full render + loudness check only when sending.",
       "files": []
     },
     {

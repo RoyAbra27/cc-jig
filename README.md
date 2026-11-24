@@ -82,6 +82,7 @@ bootstrap.sh       new-machine setup
 | [`frontend-flow`](skills/frontend-flow/SKILL.md) | UI work. Chains Impeccable, unslop and the Android skills instead of picking one |
 | [`parallel-ticket-delivery`](skills/parallel-ticket-delivery/SKILL.md) | Several independent tickets, each shipped as its own PR by a parallel worktree agent. It proves file-disjointness first, writes one shared brief, reruns every agent's check, and reports to you only when a decision is needed |
 | [`backend-api`](skills/backend-api/SKILL.md) | Build-time decisions for endpoints, jobs and migrations in any framework (auth per route, idempotency, backward-compatible migrations, timeouts), with framework facts from current docs and a NestJS gotchas file |
+| [`video-iteration`](skills/video-iteration/SKILL.md) | Revising a rendered video from feedback. Renders and measures only the changed span, proves cuts with frame-diff numbers, checks voiceover joins and loudness, and does one full render only for a version that goes to the person |
 
 ### Agents
 
@@ -94,20 +95,21 @@ bootstrap.sh       new-machine setup
 | [`plan-redteam-lead`](agents/plan-redteam-lead.md) | The skeptical team lead for `plan-redteam` |
 | [`product-dreamer`](agents/product-dreamer.md) | Product-vision research: ranked feature ideas, each with cited evidence, user moment, trust risk, cost and effort, plus patterns to steal and anti-patterns |
 | [`hebrew-copywriter`](agents/hebrew-copywriter.md) | Native Israeli Hebrew for any medium (UI, video, decks, marketing, email, social, docs): rewrites translated-sounding drafts, keeps terms consistent, handles gendered address and mixed-direction text |
+| [`video-critic`](agents/video-critic.md) | Independent frame-only critic for a revised video cut: ranked findings with timestamps, and a fixed/partly/still verdict on every earlier finding |
 
 ## Install
 
-On Windows 11 with Git Bash, or macOS (see below). Install Claude Code but don't start it yet (the first start creates `~/.claude`, and the clone needs that folder not to exist). Then:
+On Windows 11 with Git Bash, or macOS (see below). Install Claude Code but don't start it yet. The native installer already creates `~/.claude` (it keeps `downloads/` there), so a plain `git clone` into it fails; fetch the repo into the folder instead. It starts in auto mode with the auto-mode notice skipped (`defaultMode` and `skipAutoPermissionPrompt` in `settings.json`); change both before the first start if you want permission prompts. Then:
 
 ```bash
-git clone https://github.com/RoyAbra27/claude-config ~/.claude
+mkdir -p ~/.claude && git -C ~/.claude init -b main && git -C ~/.claude remote add origin https://github.com/RoyAbra27/claude-config && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
 claude   # log in once, then quit
 bash ~/.claude/bootstrap.sh
 ```
 
 The script installs CLI tools (winget, uv), PowerShell modules, the dotfiles, the user-scope mobile MCP server and the [`agent-browser`](https://github.com/vercel-labs/agent-browser) CLI for headless browser checks. Zed is installed as `$EDITOR`; swap it in `settings.json` if you use something else. It then shows a numbered menu of the third-party skills listed below and asks which to install: `all`, `none` or a list like `1,2,5`. To skip the prompt, pass `--skills all|none|1,2,5`. To add skills later, run `bash ~/.claude/scripts/install-skills.sh` (add `--dry-run` to preview). It's safe to rerun: installed items are skipped, overwritten dotfiles get a `.bak-<timestamp>` copy, and anything that fails is listed at the end. Plugins in `settings.json` download on the first `claude` start.
 
-Already have a `~/.claude`? Don't clone over it. Copy the pieces you want instead: `hooks/guard.sh` and its `settings.json` entry work on their own.
+Already have your own setup in `~/.claude`? Don't fetch over it. Copy the pieces you want instead: `hooks/guard.sh` and its `settings.json` entry work on their own.
 
 On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/bootstrap.sh`: it installs the tools with Homebrew instead of winget and skips the PowerShell modules and dotfiles. On Linux it checks for the tools instead of installing them. The hooks are bash, except `costly_loop.py` (Python 3), and CI runs `hooks/guard.test.sh`, `hooks/smoke.test.sh` and `hooks/costly_loop.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
 

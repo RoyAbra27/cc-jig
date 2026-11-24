@@ -4,7 +4,7 @@
 # documentation files, to deal in the Software without restriction, subject to the MIT License text at
 # https://github.com/echris6/motion-video-kit/blob/main/LICENSE (copyright notice and permission notice kept).
 # Integrated loudness, LRA, true peak, short-term per second; PASS/FAIL vs film targets.
-# Usage: tools/loudness.sh file.(mp4|mp3) [target_lufs=-14] [max_tp=-1.5]
+# Usage: scripts/loudness.sh file.(mp4|mp3) [target_lufs=-14] [max_tp=-1.5]
 set -euo pipefail
 f="$1"; tl="${2:--14}"; mp="${3:--1.5}"
 out=$(ffmpeg -hide_banner -i "$f" -af ebur128=peak=true -f null - 2>&1)
