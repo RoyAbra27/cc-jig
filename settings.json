@@ -30,6 +30,15 @@
         ]
       },
       {
+        "matcher": "Bash|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'P=$(command -v python || command -v python3); exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'"
+          }
+        ]
+      },
+      {
         "matcher": "ExitPlanMode",
         "hooks": [
           {
@@ -50,6 +59,15 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'P=$(command -v python || command -v python3); exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'"
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
@@ -76,6 +94,17 @@
             "command": "[ ! -f \"$HOME/.claude/skills/impeccable/scripts/impeccable\" ] || \"$HOME/.claude/skills/impeccable/scripts/impeccable\" hook",
             "timeout": 5,
             "statusMessage": "Checking UI changes"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'P=$(command -v python || command -v python3); exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'"
           }
         ]
       }
