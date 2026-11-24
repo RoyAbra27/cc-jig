@@ -84,6 +84,12 @@ EOF"
 check 2 "python.exe - <<'EOF'
 import re; print(re.sub(r'\\bx', 'y', 'x'))
 EOF"
+check 0 "cat > notes.md <<'EOF'
+run node on C:\\x
+EOF"
+check 2 "python - <<\\EOF
+import re; print(re.sub(r'\\bx', 'y', 'x'))
+EOF"
 
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
