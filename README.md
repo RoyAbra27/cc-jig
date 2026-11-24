@@ -107,7 +107,7 @@ The script installs CLI tools (winget, uv), PowerShell modules, the dotfiles, th
 
 Already have a `~/.claude`? Don't clone over it. Copy the pieces you want instead: `hooks/guard.sh` and its `settings.json` entry work on their own.
 
-On macOS or Linux, skip `bootstrap.sh` and the dotfiles. The hooks are plain bash plus `jq`.
+On macOS or Linux, skip `bootstrap.sh` and the dotfiles (both are Windows-only). Install `jq` (`brew install jq`), which the hooks need, and run `bash ~/.claude/scripts/install-skills.sh` for the third-party skills. The hooks are plain bash, and CI runs `hooks/guard.test.sh` and `hooks/smoke.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
 
 ### Make it yours
 
@@ -118,6 +118,30 @@ On macOS or Linux, skip `bootstrap.sh` and the dotfiles. The hooks are plain bas
 - `CLAUDE.md` has an Environment section with Windows-specific rules (PowerShell profile path, Git Bash quirks). Rewrite it for your machine first.
 - `settings.json` sets `"defaultMode": "auto"` and my auto-mode allow and deny rules. Review them before you use the setup.
 - `bootstrap.sh --capture` copies your live PowerShell profile and oh-my-posh config back into `dotfiles/`.
+
+## Updating
+
+The setup changes often. Paste this prompt into Claude Code, run from any folder, and it works out how you installed the setup and updates it without losing your own changes:
+
+````text
+Update my Claude Code setup from https://github.com/RoyAbra27/claude-config (branch main) without losing anything I changed. Work step by step and stop to ask me whenever a choice is not obvious.
+
+1. Find out how I installed it, without changing anything yet:
+   - Is ~/.claude a git repo? If yes, list its remotes and branch.
+   - origin is RoyAbra27/claude-config: a direct clone. My upstream is origin.
+   - origin is my own fork: add RoyAbra27/claude-config as a remote named upstream (if missing). My upstream is upstream.
+   - Not a git repo, or a clone somewhere else: I copied pieces by hand. Clone the repo to a temp folder instead and go to step 5.
+   Tell me which case you found before going on.
+2. Save my changes: run git status. If anything is modified or new, show me the list, then commit it on my branch as "local: <short summary>". Never push it.
+3. Show what is new: fetch my upstream, then show git log --oneline HEAD..<upstream>/main and a diff --stat, summarized in plain words.
+4. Update: git rebase <upstream>/main. On a conflict, keep the upstream change and re-apply my intent on top of it; if you can't tell what I meant, stop and ask me. Never use reset --hard, never force-push, never delete my commits.
+5. Copied pieces only: compare each file I have against the temp clone, show me what changed per file, and update only the files I approve. Keep my edits by merging them in, not by overwriting.
+6. If the update touched bootstrap.sh, scripts/install-skills.sh or .gitignore: on Windows rerun bash ~/.claude/bootstrap.sh; on macOS or Linux never run bootstrap.sh (it is Windows-only), run bash ~/.claude/scripts/install-skills.sh --dry-run, show me the list, and run it without --dry-run for the skills I pick. Both skip what is already installed.
+7. Check it works: jq empty ~/.claude/settings.json, then bash ~/.claude/hooks/guard.test.sh and bash ~/.claude/hooks/smoke.test.sh must both print "all cases pass".
+8. Report: what is new, which of my changes were kept and where, anything I need to do (usually: restart Claude Code to load new hooks and skills).
+````
+
+Your own changes live as `local:` commits on top of upstream, so each update replays them instead of overwriting them.
 
 ## Credits
 
