@@ -62,6 +62,15 @@ $(git diff HEAD -U0 2>/dev/null)"
     echo "Blocked by guard hook: that kills every node/python process on the machine. Kill the leftover by PID instead (find it with netstat -ano | grep :<port>, then taskkill //F //T //PID <pid>)." >&2
     exit 2
   fi
+  # Added 2026-11-24 (ratchet: the CLAUDE.md heredoc rule was extended 4 times and still broken): backslashes
+  # in a heredoc fed to python/node get mangled through Git Bash. Heredocs without a backslash still pass.
+  if printf '%s' "$CMD" | grep -qE '(python[0-9.]*|node)([[:space:]][^|;&<]*)?<<'; then
+    HEREDOC_BODY=$(printf '%s\n' "$CMD" | awk 'f { print } /<</ { f = 1 }')
+    if printf '%s' "$HEREDOC_BODY" | grep -qF '\'; then
+      echo "Blocked by guard hook: a heredoc fed to python/node contains a backslash, which Git Bash can mangle (CLAUDE.md). Write the script to a file with the Write tool and run the file." >&2
+      exit 2
+    fi
+  fi
   exit 0
 fi
 

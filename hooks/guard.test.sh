@@ -58,6 +58,19 @@ check 0 'grep -n taskkill notes.md'
 check 0 'cat .env.example'
 check 0 'cat README.txt'
 check 0 'head -5 out/nights.csv'
+check 2 "cd x && python - <<'EOF'
+print('a\\\\b')
+EOF"
+check 2 "uv run --with pillow python -I - <<'EOF'
+import re; re.sub(r'\\s+', ' ', 'a  b')
+EOF"
+check 0 "python - <<'EOF'
+print('no escapes here')
+EOF"
+check 0 "cat > notes.md <<'EOF'
+a\\b
+EOF"
+check 0 'grep -n "python - <<" notes.md'
 
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
