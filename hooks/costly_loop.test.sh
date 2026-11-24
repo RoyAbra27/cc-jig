@@ -78,6 +78,7 @@ post 'uv run python -I build.py deck.pptx' 3000
 pre 0 'segment cleared by a fast run passes' 'uv run python -I build.py deck.pptx'
 pre 0 'unrelated command passes' 'ls -la'
 SID=fresh pre 0 'session with no state passes' 'uv run python -I build.py deck.pptx'
+SID=r1 CL_DISABLE=1 pre 0 'CL_DISABLE turns the gate off' 'npx hyperframes render -o off.mp4'
 
 # Robustness
 printf 'not json' | "$PY" "$DIR/costly_loop.py" 2>/dev/null || { echo "FAIL: bad input must fail open"; FAIL=1; }

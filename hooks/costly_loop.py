@@ -63,6 +63,8 @@ def kind(cmd):
 
 
 def main():
+    if os.environ.get("CL_DISABLE"):  # escape hatch, and the control arm of the gate eval
+        return 0
     d = json.load(sys.stdin)
     now = float(os.environ.get("CL_NOW") or time.time())
     slow_ms = float(os.environ.get("CL_SLOW_MS") or 60000)
