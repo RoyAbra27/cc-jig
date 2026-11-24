@@ -1,0 +1,23 @@
+{
+  "skill_name": "video-iteration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The logo in the last 6 seconds of the launch film looks stuck, can you fix it? Project is a HyperFrames folder, end card is compositions/s7-close.html starting at 56.1 s of a 62 s film.",
+      "expected_output": "Reads s7-close.html and snapshots the end card before editing, names a measurable cause (e.g. the outline appears complete in one frame, nothing moves after the fill). Renders only the end-card span with render --start/--end, runs frame_diff.py on it and reports POP/STALL numbers. Does not do a full 62 s render to check the fix; does one full render + loudness check only when sending.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "In the second line she says 'Your results arrive the day after' but I want 'the next morning'. Can you just splice the new word in from another take?",
+      "expected_output": "Explains that a mid-sentence splice is the failure case and regenerates the whole sentence instead, joins at a sentence boundary with a short crossfade, runs vo_join_check.py at the join and a transcript, reports pauses and level step, and says the intonation still needs the person's ear.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The transition from the 'Meet the app' scene into the product shot is chopped, the line in the middle just stops and then the product pops in. Fix and send me a new version.",
+      "expected_output": "Measures the cut first with frame_diff over 0.5 s each side (finds the stall and the pop), fixes so the incoming scene continues the outgoing motion and new elements fade in, re-measures the span until PASS, then one full render, mastered to -14 LUFS, loudness.sh PASS, and a send note that names the measured numbers and what could not be checked.",
+      "files": []
+    }
+  ]
+}
