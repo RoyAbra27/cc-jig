@@ -337,7 +337,7 @@ def main():
             elif expect and not st["expect_used"].get(g):
                 allow("slow", "expect", g)
             else:
-                return block("slow", streak_msg(g, "the slow step `%s`" % g[:80], g if GATE_KEYS else None) +
+                return block("slow", streak_msg(g, "the slow step `%s`" % g[:80], step_key(g)) +
                              " Read or grep what caused the last result first, run only the affected unit (one "
                              "slide, page, span, test), or add a line `# expect: <what this run will show and why>` "
                              "(20+ chars, new text, one per streak).", g)
@@ -366,5 +366,12 @@ def main():
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except Exception:
+    except Exception as e:
+        try:  # leave a trace for the trial review, next to the gate log
+            log = os.environ.get("CL_LOG") or os.path.join(os.path.expanduser("~/.claude"), "metrics", "loop-gate.jsonl")
+            os.makedirs(os.path.dirname(log), exist_ok=True)
+            open(os.path.join(os.path.dirname(log), "loop-gate-errors.jsonl"), "a", encoding="utf-8").write(json.dumps(
+                {"ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()), "v": VERSION, "error": type(e).__name__}) + "\n")
+        except Exception:
+            pass
         sys.exit(0)

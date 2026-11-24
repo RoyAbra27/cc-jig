@@ -18,7 +18,7 @@ ev() {
     --arg a "${AGENT:-}" --arg c "${CWD:-$REPO}" \
     '{hook_event_name: $e, session_id: $s, tool_name: $t, tool_input: $i, duration_ms: $d, tool_use_id: "x", cwd: $c}
      + (if $a != "" then {agent_id: $a} else {} end)' 2>/dev/null \
-    | CL_NOW=$T "$PY" "$DIR/costly_loop.py" 2>/dev/null
+    | CL_NOW=$T "$PY" "$DIR/costly_loop.py" 2>"$TMP/err"
   got=$?
   if [ "$got" -ne "$want" ]; then echo "FAIL (want $want, got $got): $label"; FAIL=1; fi
 }
@@ -97,6 +97,7 @@ run 'expect passes once per streak' "$B
 # expect: slide 18 label box width is now positive" 240000
 pre 2 'second expect in the same streak blocks' "$B
 # expect: caption line moves down one pixel on slide 7"
+grep -q 's each)' "$TMP/err" || { echo "FAIL: slow block names no duration: $(cat "$TMP/err")"; FAIL=1; }
 pre 0 'different unit passes' "$B --slides 18"
 pre 0 'fast command passes' 'npx vitest run'
 post 'npx vitest run' 2000
@@ -184,6 +185,10 @@ grep -q '"rule": "install", "decision": "block"' "$CL_LOG" || { echo "FAIL: bloc
 grep -q '"decision": "pass:fg"' "$CL_LOG" || { echo "FAIL: # fg passes are not logged"; FAIL=1; }
 grep -q '"decision": "bounce"' "$CL_LOG" || { echo "FAIL: bounces are not logged"; FAIL=1; }
 grep -q '"v": 2' "$CL_LOG" || { echo "FAIL: log records lack the rule version"; FAIL=1; }
+mkdir -p "$CL_STATE"; printf '[]' > "$CL_STATE/bad.json"
+SID=bad pre 0 'malformed state fails open' 'npm test'
+[ "$(grep -c '"error": "AttributeError"' "$TMP/loop-gate-errors.jsonl" 2>/dev/null)" = 1 ] \
+  || { echo "FAIL: a swallowed error leaves no trace in loop-gate-errors.jsonl"; FAIL=1; }
 
 rm -rf "$TMP"
 [ "$FAIL" -eq 0 ] && echo "costly_loop: all cases pass"

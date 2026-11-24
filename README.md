@@ -55,7 +55,7 @@ bootstrap.sh       new-machine setup
 | [`session-context.sh`](hooks/session-context.sh) | session start, resume, clear, compact, fork | Injects working state from the repo itself (branch, uncommitted files, recent commits) plus the skill router. When the weekly setup review is due, also shows the user a one-line notice |
 | [`no-questions.sh`](hooks/no-questions.sh) | each prompt; before AskUserQuestion | A prompt saying "don't ask questions" (English or Hebrew) flags the session, and AskUserQuestion is then denied so Claude decides and names its choice. "you can ask" clears it |
 | [`lint-on-save.sh`](hooks/lint-on-save.sh) | after Edit, Write | Runs the project's own prettier and eslint on TS/JS files. Never blocks |
-| [`costly_loop.py`](hooks/costly_loop.py) | before Bash, Read, Grep, Glob; after Bash | Stops trial-and-error loops: the second blind rerun in a row of a device install or a slow (60s+) step is blocked until Claude reads or greps something, or states what it expects (`# expect:`); a full video render needs `# final`. It also learns how long each step takes per repo, lists the slow ones at session start, and sends a known-slow foreground step back to run in the background (`# fg` opts out). Together with `BASH_*_TIMEOUT_MS=90000` in `settings.json`, long commands stop blocking the conversation. Python; fails open; `CL_DISABLE=1` turns it off. Tests: `bash hooks/costly_loop.test.sh` |
+| [`costly_loop.py`](hooks/costly_loop.py) | before Bash, Read, Grep, Glob; after Bash | Stops trial-and-error loops: the second blind rerun in a row of a device install or a slow (60s+) step is blocked until Claude reads or greps something, or states what it expects (`# expect:`); a full video render needs `# final`. It also learns how long each step takes per repo (forgotten 14 days after its last foreground run), lists the slow ones at session start, and sends a known-slow foreground step back to run in the background (`# fg` opts out). Together with `BASH_*_TIMEOUT_MS=90000` in `settings.json`, long commands stop blocking the conversation. Python; fails open; `CL_DISABLE=1` turns it off. Tests: `bash hooks/costly_loop.test.sh` |
 
 `settings.json` also wires Impeccable's own hook (after Edit/Write, at session start, at stop). It no-ops when Impeccable isn't installed.
 
@@ -120,6 +120,7 @@ On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/b
 - `CLAUDE.md` assumes some CLIs: `jq` (required by the hooks), Python 3 (for `costly_loop.py`; without it the hook exits quietly), `uv`, `markitdown` and [`rtk`](https://github.com/rtk-ai/rtk) for compact command output (bootstrap installs all of these; `settings.json` sets `RTK_SUPPRESS_HOOK_WARNING=1` because rtk is used manually, without its hook).
 - `CLAUDE.md` has an Environment section with Windows-specific rules (PowerShell profile path, Git Bash quirks). Rewrite it for your machine first.
 - `settings.json` sets `"defaultMode": "auto"` and my auto-mode allow and deny rules. Review them before you use the setup.
+- `settings.json` keeps transcripts 90 days (`cleanupPeriodDays`, default 30) so `loop-metrics.py` can compare a baseline window with a later one.
 - `bootstrap.sh --capture` copies your live PowerShell profile and oh-my-posh config back into `dotfiles/`.
 
 ## Updating

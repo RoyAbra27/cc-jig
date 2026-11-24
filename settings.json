@@ -213,6 +213,7 @@
       "effortLevel": "medium"
     }
   },
+  "cleanupPeriodDays": 90,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,

@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     strategy:
@@ -17,7 +20,9 @@ jobs:
       - run: ln -s "$GITHUB_WORKSPACE" "$HOME/.claude"
       - run: bash --version | head -1 && jq --version
       - name: syntax
-        run: for f in hooks/*.sh scripts/*.sh bootstrap.sh; do bash -n "$f" || exit 1; done
+        run: for f in hooks/*.sh scripts/*.sh skills/*/scripts/*.sh bootstrap.sh; do bash -n "$f" || exit 1; done
+      - run: jq empty settings.json
+      - run: python3 -m py_compile hooks/*.py scripts/*.py skills/*/scripts/*.py && python3 scripts/loop-metrics.py --help
       - run: bash hooks/guard.test.sh
       - run: bash hooks/smoke.test.sh
       - run: bash hooks/costly_loop.test.sh

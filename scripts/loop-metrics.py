@@ -3,13 +3,15 @@
 Run: python ~/.claude/scripts/loop-metrics.py --since 2026-10-25 --until 2026-11-24 [--out f.json]
 Counts only, never message text. Patterns and segments() come from hooks/costly_loop.py (the gate).
 """
-import argparse, collections, glob, json, os, re, sys
+import argparse, collections, glob, json, os, re, subprocess, sys
 
 HOME = os.path.expanduser("~/.claude")
 SLOW_MS = 60_000
 
 
-sys.path.insert(0, os.path.join(HOME, "hooks"))
+# the hooks next to this script, so a checkout measures with its own gate code
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hooks"))
+import costly_loop  # noqa: E402
 from costly_loop import EXPECT_RE, IMAGE_RE, POLL_RE, kind, segments, unquoted  # noqa: E402  (shared with the gate)
 
 FG_CAP_S = 90  # the native timeout since 2026-11-24, applied to both windows so the cap alone shows no gain
@@ -163,6 +165,20 @@ def gate_log(since, until):
     return dict(out)
 
 
+def gate_errors(since, until):
+    """Exceptions the gate swallowed (it fails open), from loop-gate-errors.jsonl."""
+    path = os.path.join(HOME, "metrics", "loop-gate-errors.jsonl")
+    if not os.path.exists(path):
+        return 0
+    n = 0
+    for line in open(path, encoding="utf-8"):
+        try:
+            n += since <= json.loads(line).get("ts", "")[:10] <= until
+        except ValueError:
+            continue
+    return n
+
+
 def summarize(sessions):
     def kind(pred, metric):
         rows = [s for s in sessions.values() if pred(s)]
@@ -209,11 +225,18 @@ def main():
     ap.add_argument("--out")
     a = ap.parse_args()
     sessions = scan(a.since, a.until)
-    report = {"window": [a.since, a.until], "summary": summarize(sessions), "gate_log": gate_log(a.since, a.until),
-              "sessions": sessions}
+    try:
+        head = subprocess.run(["git", "-C", os.path.dirname(os.path.abspath(__file__)), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    except OSError:
+        head = ""
+    report = {"script": {"head": head, "gate_version": costly_loop.VERSION, "argv": sys.argv[1:]},
+              "window": [a.since, a.until], "summary": summarize(sessions), "gate_log": gate_log(a.since, a.until),
+              "gate_errors": gate_errors(a.since, a.until), "sessions": sessions}
     for k, v in report["summary"].items():
         print(k, v)
     print("gate_log", report["gate_log"])
+    print("gate_errors", report["gate_errors"])
     if a.out:
         os.makedirs(os.path.dirname(a.out), exist_ok=True)
         json.dump(report, open(a.out, "w", encoding="utf-8"), indent=1)

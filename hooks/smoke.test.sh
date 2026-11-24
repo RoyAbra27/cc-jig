@@ -44,6 +44,12 @@ cmd=$(jq -r '[.hooks[][].hooks[].command | select(test("costly_loop"))][0]' "$S"
 err=$(printf '{}' | PATH="$CLT/bin" "$BASH" -c "$cmd" 2>&1 >/dev/null); rc=$?
 if [ "$rc" -ne 0 ] || [ -n "$err" ]; then echo "FAIL costly_loop without python (exit $rc): $err"; FAIL=1; fi
 unset CL_STATE CL_LOG CL_DURATIONS
+
+# loop-metrics stamps its report with the code that produced it (no transcripts: exit 1 is fine)
+PY=$(command -v python || command -v python3)
+HOME="$CLT" "$PY" "$DIR/../scripts/loop-metrics.py" --since 2026-11-24 --until 2026-11-24 --out "$CLT/r.json" >/dev/null 2>&1
+jq -e '.script.gate_version and (.script | has("head") and has("argv"))' "$CLT/r.json" >/dev/null 2>&1 \
+  || { echo "FAIL loop-metrics report has no script stamp"; FAIL=1; }
 find "$CLT" -type f -delete; find "$CLT" -depth -type d -exec rmdir {} \;
 
 # install-skills.sh marks hallmark user-invoke-only without touching the rest of the file

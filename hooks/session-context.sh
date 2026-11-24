@@ -40,7 +40,7 @@ context() {
   fi
 
   if [ -n "$REVIEW_DUE" ]; then
-    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) check skillUsage in ~/.claude.json for subagent-dispatch and debugging-protocol; at 0 uses, move their key lines into CLAUDE.md; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves. When done: touch ~/.claude/.setup-review-$REVIEW_WEEK-done"
+    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) check skillUsage in ~/.claude.json for subagent-dispatch and debugging-protocol; at 0 uses, move their key lines into CLAUDE.md; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves; (5) from 2026-12-08, if ~/.claude/.costly-loop-trial-done is absent: run \`python ~/.claude/scripts/loop-metrics.py --since 2026-11-25 --until <today> --out ~/.claude/metrics/trial-2026-12-08.json\`, compare it with ~/.claude/metrics/baseline-2026-11-24.json by the decision rules in loop-metrics.py, and touch that marker once the user decides. When done: touch ~/.claude/.setup-review-$REVIEW_WEEK-done"
   fi
 
   # Added 2026-09-02: skill/agent router, injected every session start (incl. compact) the
