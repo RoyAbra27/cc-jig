@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Added 2026-10-26 (ratchet): every plan gets a plan-redteam pass before it is executed.
 # PreToolUse(ExitPlanMode): exit 2 BLOCKS unless the plan has a "## Red team" section
-# (written by plan-redteam step 6) or an explicit opt-out line "red-team: skip - <reason>".
+# (written by plan-redteam step 6) or an explicit opt-out line "red-team: skip - <reason>" (short plans only, see below).
 # PostToolUse(Write|Edit) on docs/superpowers/{plans,specs}/*.md: reminder only (no single
 # tool call means "about to execute" there, so it cannot block).
 INPUT=$(cat)
@@ -15,10 +15,13 @@ if [ "$TOOL" = "ExitPlanMode" ]; then
     [ -z "$F" ] && F=$(ls -t "$HOME"/.claude/plans/*.md 2>/dev/null | head -1)
     [ -n "$F" ] && [ -f "$F" ] && PLAN=$(cat "$F")
   fi
-  if printf '%s' "$PLAN" | grep -qE '^##[[:space:]]+Red team|^red-team: skip - [^[:space:]]'; then
+  printf '%s' "$PLAN" | grep -qE '^##[[:space:]]+Red team' && exit 0
+  # 2026-11-24: a large plan self-waived with a skip line and the user rejected it; skip only counts on short plans.
+  if printf '%s' "$PLAN" | grep -qE '^red-team: skip - [^[:space:]]' \
+     && [ "$(printf '%s\n' "$PLAN" | grep -c '[^[:space:]]')" -le 30 ]; then
     exit 0
   fi
-  echo "Blocked by plan-redteam gate: run the plan-redteam skill on this plan first; its apply step adds a '## Red team' section. For a trivial plan, add the line 'red-team: skip - <reason>' to the plan file instead, then call ExitPlanMode again." >&2
+  echo "Blocked by plan-redteam gate: run the plan-redteam skill on this plan first; its apply step adds a '## Red team' section. Only a short plan (30 non-blank lines or fewer) may use the line 'red-team: skip - <reason>' instead." >&2
   exit 2
 fi
 
