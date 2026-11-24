@@ -41,6 +41,7 @@ key_is 'npx -y hyperframes@0.9.86 render -o renders/v2.mp4' 'npx -y hyperframes 
   || { echo "FAIL key: v1/v2 output paths differ"; FAIL=1; }
 key_is 'adb -s emulator-5554 shell input tap 1 2' 'adb -s shell input'
 key_is 'docker compose -f x.yml up -d' 'docker compose -f up -d'
+key_is 'F=$(ls -t *.jsonl' 'None'
 
 # Renders
 SID=r1

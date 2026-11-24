@@ -74,7 +74,8 @@ def strip_prefix(seg):
 def step_key(seg):
     """`npx -y hyperframes@0.9.86 render -o renders/v2.mp4` -> `npx -y hyperframes render -o`."""
     toks = strip_prefix(seg)
-    if not toks:
+    # `F=$(ls -t x` leaves `-t x`: no program to key on
+    if not toks or toks[0].startswith("-") or re.search(r"[$*?(){}<>]", toks[0]):
         return None
     prog = re.split(r"[/\\]", toks[0])[-1]
     out, subs = [re.sub(r"@[\d.]+$", "", re.sub(r"\.exe$", "", prog, flags=re.I))], 0
