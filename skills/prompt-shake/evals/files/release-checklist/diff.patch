@@ -1,0 +1,7 @@
+--- a/release-checklist.md
++++ b/release-checklist.md
+@@ -9,3 +9,4 @@
+ - Bump versionCode in app/build.gradle.kts; Play rejects an upload that reuses a code.
+ - Be careful and thorough.
+ - Tag the release commit `vX.Y.Z` only after the Play upload succeeds, never before.
++- Always increase versionCode before building a release, or Play Console rejects the upload.

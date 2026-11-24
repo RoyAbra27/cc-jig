@@ -1,0 +1,31 @@
+{
+  "skill_name": "prompt-shake",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "prompt-shake evals/files/deploy-notes/deploy-notes.md, it feels bloated",
+      "expected_output": "Reads the whole file and audits line by line, tagging each line with the proof that keeps or cuts it. Cuts line 1 (default knowledge), collapses 2 and 3 into one (same rule twice), folds 7 into 6 (special case of the clean-git-status rule), and flags 5 as hook-enforced (guard.sh blocks em dashes in files) so it can go. Keeps 4 and 8 as load-bearing gotchas. Reports a findings table (line | failed proof + evidence | action) and does not edit the file or add or reword rules.",
+      "files": ["evals/files/deploy-notes/deploy-notes.md"],
+      "assertions": [
+        "Recommends cutting line 1 as default knowledge",
+        "Recommends keeping only one of lines 2 and 3",
+        "Recommends folding line 7 into line 6",
+        "Flags line 5 as already enforced by a hook",
+        "Keeps lines 4 and 8",
+        "Reports a table and does not edit the file or add new rules"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I just added a line to evals/files/release-checklist/release-checklist.md, the diff is in evals/files/release-checklist/diff.patch. shake it",
+      "expected_output": "Treats the diff as the scope but reads the whole file. Finds that the new line duplicates the existing versionCode line and recommends cutting the NEW line (not the old one). Does not recommend edits to lines outside the diff; may note 'Be careful and thorough' as an out-of-scope observation only. Recommends only; no edits.",
+      "files": ["evals/files/release-checklist/release-checklist.md", "evals/files/release-checklist/diff.patch"],
+      "assertions": [
+        "Identifies the new line as a duplicate of the existing versionCode line",
+        "Recommends cutting the newly added line rather than the original",
+        "Does not recommend in-scope edits to lines outside the diff",
+        "Does not edit the file"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "skill_name": "buy-vs-build",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "fetchInvoices in evals/files/retry-repo/src/billing/client.ts fails now and then with 503s from the billing provider. add retries with exponential backoff and jitter",
+      "expected_output": "Names the capability (retry / backoff) and checks the manifest first. Finds axios-retry already in evals/files/retry-repo/package.json and uses it on the existing axios instance (exponential delay, retry on network errors and 5xx, a retry cap). Does not hand-roll a retry loop and does not add a new dependency or go shopping on the web, because the inward check ended the run.",
+      "files": ["evals/files/retry-repo/package.json", "evals/files/retry-repo/src/billing/client.ts"],
+      "assertions": [
+        "Reads package.json before writing retry code",
+        "Uses the already-installed axios-retry instead of hand-rolling a retry loop",
+        "Does not add a new dependency",
+        "Caps the number of retries and limits retries to network errors or 5xx"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "we need to email a weekly usage report every monday 8am from our express app (evals/files/report-repo). it runs on one small VPS, about 40 users. should i add bullmq or something for this?",
+      "expected_output": "Names the capability (job scheduler / cron) with canonical terms, checks the manifest (nothing scheduling-related installed), searches the web for real options with URLs, and delivers 2-4 options in a table with what each gives up. States that at this volume (one weekly job, one instance) the system crontab or a tiny in-process scheduler beats BullMQ, which would add Redis to run. Offers the choice instead of deciding, and invents no package.",
+      "files": ["evals/files/report-repo/package.json"],
+      "assertions": [
+        "Checks the project's package.json before recommending anything",
+        "Every recommended option comes with a URL from a search made in this run",
+        "Presents 2-4 options with what each gives up",
+        "Says that at this volume a plain cron or tiny scheduler wins over BullMQ, and names Redis as BullMQ's extra cost",
+        "Leaves the final choice to the user"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "skill_name": "consult",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Earlier you proposed moving our background jobs from the Postgres jobs table (a worker polling with SELECT ... FOR UPDATE SKIP LOCKED every 2s) to Redis + BullMQ, because the polling adds DB load. Context: about 2,000 jobs a day, one Postgres 16 instance we already run, no Redis anywhere yet, a two-person team. Are you sure? Double check before I approve.",
+      "expected_output": "Does not re-argue its own proposal in the same thread. Freezes the proposal into a neutral standalone brief (objective, mechanism, constraints, alternatives already rejected), names the fork in one sentence (Postgres-backed simplicity vs a Redis-backed queue runtime), picks the standard effort level because this is an infrastructure change, and dispatches two consult-side agents in one message with no conversation history. Verifies factual claims (e.g. polling load at 2,000 jobs/day) before reporting. Report has common ground, each side, the actual disagreement, a recommendation, a minority warning, and a reopen-when threshold. Notes both sides ran on the same model family. Does not implement anything.",
+      "files": [],
+      "assertions": [
+        "Moves the review to fresh readers instead of answering from its own reasoning in the same thread",
+        "Writes a neutral brief with no advocacy for the original proposal",
+        "Names the fork as a trade-off between two options in one sentence",
+        "Dispatches two sides in one message without passing the conversation history",
+        "Report includes a reopen-when threshold (an observable signal that should bring the other side back)",
+        "Does not start the migration or any implementation"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "You said we must upgrade our API from Node 18 to Node 22 before next month's security audit because Node 18 is end of life. Argue both sides before I approve.",
+      "expected_output": "Recognizes that the core disagreement is factual (is Node 18 past end of life, and what the audit requires), not a values fork. Verifies the Node 18 end-of-life date against the official Node.js release schedule instead of staging a two-sided debate. Reports 'No live fork': the verified fact, why the fork collapsed, and the decisive constraint or the measurement still needed (e.g. what the audit checks). Does not dispatch two opposing sides or manufacture disagreement, and does not perform the upgrade.",
+      "files": [],
+      "assertions": [
+        "Identifies the question as factual rather than a trade-off between values",
+        "Checks the Node 18 end-of-life date against an official source instead of relying on memory",
+        "Does not dispatch or simulate two opposing advocates for a factual question",
+        "Reports that there is no live fork and names what would still need checking",
+        "Does not perform the upgrade"
+      ]
+    }
+  ]
+}

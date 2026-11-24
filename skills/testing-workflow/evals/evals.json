@@ -2,21 +2,35 @@
   "skill_name": "testing-workflow",
   "evals": [
     {
+      "id": 4,
+      "prompt": "Add shipping to total() in evals/fixtures/pricing/pricing.ts: if the subtotal after discount is under 100, add a flat 9.90 shipping fee (not taxed); 100 or more ships free.",
+      "expected_output": "Reads pricing.ts, pricing.spec.ts and test-utils.ts first. Updates the existing it.each rows whose totals now change (58.5 -> 68.4, 52.65 -> 62.55, 70.2 -> 80.1) in the same change, adds boundary rows (net exactly 100 ships free, net just under 100 pays 9.90), builds every order with makeOrder from test-utils.ts, uses hand-worked literal expected values, shows the spec failing before the implementation and passing after.",
+      "files": ["evals/fixtures/pricing/pricing.ts", "evals/fixtures/pricing/pricing.spec.ts", "evals/fixtures/pricing/test-utils.ts"],
+      "assertions": [
+        "The three existing it.each rows are updated to the new totals (68.4, 62.55, 80.1)",
+        "Adds a boundary case at net exactly 100 (free shipping) and one just under 100",
+        "Builds test orders with makeOrder from test-utils.ts, no new inline order factory or mock",
+        "Expected values are literal numbers, not recomputed with the same formula inside the test",
+        "Shows a failing run before the implementation change and a passing run after"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Add a lineTotals(order) function to evals/fixtures/pricing/pricing.ts that returns each item's price * qty after the order discount, rounded to cents. With tests.",
+      "expected_output": "Tests are written first in the existing pricing.spec.ts using it.each and makeOrder. Expected arrays are hand-worked literals (e.g. [{price: 19.99, qty: 3}] with discount 0.15 -> [50.97]), never computed in the test as price * qty * (1 - discount). Includes a case where rounding matters. Spec shown failing, then passing.",
+      "files": ["evals/fixtures/pricing/pricing.ts", "evals/fixtures/pricing/pricing.spec.ts", "evals/fixtures/pricing/test-utils.ts"],
+      "assertions": [
+        "Expected values are hand-worked literals; the test never computes price * qty * (1 - discount)",
+        "Includes a case where rounding to cents changes the value",
+        "Uses it.each in the existing pricing.spec.ts rather than a new file or copy-pasted it() blocks",
+        "Builds orders with makeOrder from test-utils.ts",
+        "Shows the spec failing before the implementation and passing after"
+      ]
+    },
+    {
       "id": 1,
       "prompt": "Bug: slugify('  Hello World  ') returns '-hello-world-' but should return 'hello-world'. Fix it in evals/fixtures/slugify.ts.",
       "expected_output": "A failing test case reproducing the leading/trailing hyphen bug is added to the existing it.each table in slugify.spec.ts BEFORE the implementation changes, the run output showing it fail is shown, then the fix lands and the spec is re-run and passes. No separate copy-pasted it() block when the existing parameterized table fits.",
-      "files": ["evals/fixtures/slugify.ts", "evals/fixtures/slugify.spec.ts"]
-    },
-    {
-      "id": 2,
-      "prompt": "Add a maxLength option to slugify in evals/fixtures/slugify.ts that truncates the result without leaving a trailing hyphen.",
-      "expected_output": "Spec cases for the new option are written first and shown failing, then the implementation is added, then the spec is run and passes. The existing spec file is extended rather than a new one created.",
-      "files": ["evals/fixtures/slugify.ts", "evals/fixtures/slugify.spec.ts"]
-    },
-    {
-      "id": 3,
-      "prompt": "Change slugify in evals/fixtures/slugify.ts to throw on empty input instead of returning an empty string.",
-      "expected_output": "The existing spec is updated in the same change to assert the throw, the source file is read fully before editing, and the spec is run with output shown before claiming done.",
       "files": ["evals/fixtures/slugify.ts", "evals/fixtures/slugify.spec.ts"]
     }
   ]

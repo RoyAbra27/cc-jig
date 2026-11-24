@@ -1,0 +1,10 @@
+{
+  "name": "team-dashboard",
+  "version": "0.9.2",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3"
+  }
+}
