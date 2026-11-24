@@ -38,7 +38,7 @@
 - No two views/endpoints showing overlapping data; merge or delete.
 
 ## Verification
-- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18)
+- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18). No build-check-patch loops: read the source first so one build confirms the plan; for media, check only the changed span (`render --start/--end`, snapshots) and run the full build only for a deliverable (added 2026-11-24). Before saying a visual fix is done, check each element the request named and show a screenshot per element, naming where it was seen (the emulator is not the phone) (added 2026-11-24)
 - Never pipe a test command (`| tail`, `| head`, `| grep`) in a chain that commits: run it alone and check its exit code (added 2026-10-29)
 - **Blocked steps (added 2026-10-29):** do every step the guard hook or auto mode allows first, then give the blocked ones (push, deletes, DROP, bucket locks, hook edits) as one numbered `!` block at the end, with preconditions. Never chain a blockable command onto other work. Before offering a step that discards work (`reset --hard`, `branch -D`, `checkout -- .`, force push), run `git status` and `git log` on that repo and say what it would drop (added 2026-11-18)
 
