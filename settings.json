@@ -1,7 +1,8 @@
 {
   "env": {
     "EDITOR": "zed",
-    "RTK_SUPPRESS_HOOK_WARNING": "1"
+    "RTK_SUPPRESS_HOOK_WARNING": "1",
+    "CLAUDE_CODE_SUBAGENT_EFFORT": "medium"
   },
   "permissions": {
     "deny": [
@@ -13,7 +14,8 @@
     "defaultMode": "auto"
   },
   "skillOverrides": {
-    "hallmark": "off"
+    "hallmark": "off",
+    "developing-with-streamlit": "off"
   },
   "hooks": {
     "PreToolUse": [
@@ -22,7 +24,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c '\"$HOME/.claude/hooks/guard.sh\"'"
+            "command": "bash -c '\"$HOME/.claude/hooks/guard.sh\"'",
+            "onFailure": "block"
           }
         ]
       },
@@ -31,7 +34,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c '\"$HOME/.claude/hooks/plan-redteam-gate.sh\"'"
+            "command": "bash -c '\"$HOME/.claude/hooks/plan-redteam-gate.sh\"'",
+            "onFailure": "block"
           }
         ]
       },
@@ -140,7 +144,7 @@
     "frontend-design@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": true,
     "ponytail@ponytail": true,
-    "hyperframes@hyperframes": false,
+    "hyperframes@hyperframes": true,
     "kotlin-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
