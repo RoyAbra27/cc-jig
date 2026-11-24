@@ -32,6 +32,13 @@ context() {
     fi
   fi
 
+  # Added 2026-11-24: steps that usually take 30s+ in this repo, learned by costly_loop.py from real durations.
+  PY=$(command -v python || command -v python3)
+  if [ -n "$CWD" ] && [ -n "$PY" ]; then
+    SLOW=$("$PY" "$HOOK_DIR/costly_loop.py" --slow-list "$CWD" 2>/dev/null)
+    [ -n "$SLOW" ] && echo "- $SLOW"
+  fi
+
   if [ -n "$REVIEW_DUE" ]; then
     echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) check skillUsage in ~/.claude.json for subagent-dispatch and debugging-protocol; at 0 uses, move their key lines into CLAUDE.md; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves. When done: touch ~/.claude/.setup-review-$REVIEW_WEEK-done"
   fi

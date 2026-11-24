@@ -2,7 +2,9 @@
   "env": {
     "EDITOR": "zed",
     "RTK_SUPPRESS_HOOK_WARNING": "1",
-    "CLAUDE_CODE_SUBAGENT_EFFORT": "medium"
+    "CLAUDE_CODE_SUBAGENT_EFFORT": "medium",
+    "BASH_DEFAULT_TIMEOUT_MS": "90000",
+    "BASH_MAX_TIMEOUT_MS": "90000"
   },
   "permissions": {
     "deny": [
