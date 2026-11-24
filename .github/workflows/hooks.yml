@@ -12,7 +12,7 @@ jobs:
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # the hooks resolve paths through $HOME/.claude, as on a real install
       - run: ln -s "$GITHUB_WORKSPACE" "$HOME/.claude"
       - run: bash --version | head -1 && jq --version
