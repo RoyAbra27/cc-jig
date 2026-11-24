@@ -1,0 +1,2 @@
+# LF everywhere: the hooks run under bash on macOS and Linux too, and CRLF breaks bash
+* text=auto eol=lf
