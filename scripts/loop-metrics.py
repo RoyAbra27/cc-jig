@@ -10,7 +10,11 @@ SLOW_MS = 60_000
 
 
 sys.path.insert(0, os.path.join(HOME, "hooks"))
-from costly_loop import EXPECT_RE, IMAGE_RE, kind, segments  # noqa: E402  (shared with the gate)
+from costly_loop import EXPECT_RE, IMAGE_RE, POLL_RE, kind, segments, unquoted  # noqa: E402  (shared with the gate)
+
+FG_CAP_S = 90  # the native timeout since 2026-11-24, applied to both windows so the cap alone shows no gain
+GATE_MSG = (("full video render", "render"), ("`# final` render", "render"), ("device install", "install"),
+            ("slow step", "slow"), ("Bounced by costly-loop", "bounce"))
 
 
 def classify(cmd, background):
@@ -40,6 +44,7 @@ def scan(since, until):
         if "scratchpad" in proj or "-eval-" in proj:
             continue
         sid = session_of(f)
+        main_session = "subagents" not in f
         S = sessions[sid]
         calls, results = [], {}
         for line in open(f, encoding="utf-8", errors="ignore"):
@@ -60,14 +65,33 @@ def scan(since, until):
                     if c.get("type") == "tool_use":
                         calls.append((c.get("id"), c.get("name"), c.get("input") or {}, ts))
             elif d.get("type") == "user" and isinstance(content, list):
+                tur = d.get("toolUseResult")
+                if main_session and isinstance(tur, dict) and tur.get("backgroundedByUser"):
+                    S["ctrl_b"] += 1
                 for c in content:
                     if c.get("type") == "tool_result":
                         txt = c.get("content")
                         txt = json.dumps(txt) if not isinstance(txt, str) else txt
-                        results[c.get("tool_use_id")] = (ts, "hook error" in txt or "Blocked by" in txt)
+                        gate = next((r for m, r in GATE_MSG if "costly-loop gate" in txt and m in txt), None)
+                        results[c.get("tool_use_id")] = (ts, "hook error" in txt or "Blocked by" in txt, gate)
         last_diag, last_install, slow_last = "", None, {}
-        for tid, name, inp, ts in calls:
-            blocked = results.get(tid, ("", False))[1]
+        for j, (tid, name, inp, ts) in enumerate(calls):
+            res = results.get(tid, ("", False, None))
+            blocked = res[1]
+            if res[2]:  # M4: what followed a gate block or bounce, within the next 3 relevant calls
+                nxt = [c for c in calls[j + 1:] if c[1] in ("Read", "Grep", "Glob", "Bash")][:3]
+                S["gate_%s_blocks" % res[2]] += 1
+                if any(c[1] in ("Grep", "Glob") or (c[1] == "Read" and not IMAGE_RE.search(c[2].get("file_path", "")))
+                       for c in nxt):
+                    S["gate_%s_diag_next3" % res[2]] += 1
+                if any(results.get(c[0], ("", False, None))[2] for c in nxt):
+                    S["gate_%s_reblocked_next3" % res[2]] += 1
+            if (main_session and name == "Bash" and not inp.get("run_in_background") and res[0]
+                    and not POLL_RE.search(unquoted(inp.get("command", "")))):
+                secs = _ms(ts, res[0]) / 1000
+                if secs >= 30:
+                    S["fg_slow_calls"] += 1
+                    S["fg_wait_capped_s"] += min(secs, FG_CAP_S)
             if is_review(name, inp):
                 S["review_dispatches"] += 1
             if name in ("Grep", "Glob") or (name == "Read" and not IMAGE_RE.search(inp.get("file_path", ""))):
@@ -93,7 +117,7 @@ def scan(since, until):
                     S["blind_installs"] += 1
                 last_install = ts
             else:
-                end = results.get(tid, ("", False))[0]
+                end = res[0]
                 segs = segments(cmd)
                 hit = [s for s in segs if s in slow_last]
                 if hit and not EXPECT_RE.search(cmd) and all(last_diag < slow_last[s] for s in hit):
@@ -129,10 +153,13 @@ def gate_log(since, until):
             continue
         if not (since <= d.get("ts", "")[:10] <= until):
             continue
-        out["%s:%s" % (d.get("rule"), d.get("decision"))] += 1
+        out["v%s:%s:%s" % (d.get("v", 1), d.get("rule"), d.get("decision"))] += 1  # v1 and v2 rule sets apart
         if d.get("expect"):
             expects[d.get("session")].add(d["expect"])
     out["distinct_expects_per_session_max"] = max((len(v) for v in expects.values()), default=0)
+    fg, bounced = out.get("v2:bounce:pass:fg", 0), out.get("v2:bounce:bounce", 0)
+    # A6 decision rule: drop the bounce if more than half of bounce-eligible calls carry `# fg`
+    out["fg_share_of_bounce_eligible"] = round(fg / (fg + bounced), 2) if fg + bounced else None
     return dict(out)
 
 
@@ -155,7 +182,24 @@ def summarize(sessions):
         "review_dispatches_per_session": kind(every, "review_dispatches"),
         "output_tokens_per_session": kind(every, "output_tokens"),
         "blocked_total": sum(v for s in sessions.values() for k, v in s.items() if k.startswith("blocked_")),
+        "ctrl_b_per_session": kind(every, "ctrl_b"),  # the auto-background goal: the user stops pressing Ctrl+B
+        "fg_wait_capped_s_per_session": kind(every, "fg_wait_capped_s"),
+        "gate_outcomes": outcomes(sessions),
     }
+
+
+def outcomes(sessions):
+    """M4/M5: per rule, the share of blocks followed by a diagnosis, or by another block, within 3 calls.
+    A rule with 5+ v2 blocks where under half end the streak gets loosened or dropped; fewer: extend."""
+    out = {}
+    for rule in ("render", "install", "slow", "bounce"):
+        n = sum(s.get("gate_%s_blocks" % rule, 0) for s in sessions.values())
+        if n:
+            dg = sum(s.get("gate_%s_diag_next3" % rule, 0) for s in sessions.values())
+            rb = sum(s.get("gate_%s_reblocked_next3" % rule, 0) for s in sessions.values())
+            out[rule] = {"blocks": n, "diag_next3": round(dg / n, 2), "reblocked_next3": round(rb / n, 2),
+                         "judge": "ok" if n >= 5 else "extend to 2026-12-22"}
+    return out
 
 
 def main():
