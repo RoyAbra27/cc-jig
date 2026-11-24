@@ -3,29 +3,82 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Earlier you proposed moving our background jobs from the Postgres jobs table (a worker polling with SELECT ... FOR UPDATE SKIP LOCKED every 2s) to Redis + BullMQ, because the polling adds DB load. Context: about 2,000 jobs a day, one Postgres 16 instance we already run, no Redis anywhere yet, a two-person team. Are you sure? Double check before I approve.",
-      "expected_output": "Does not re-argue its own proposal in the same thread. Freezes the proposal into a neutral standalone brief (objective, mechanism, constraints, alternatives already rejected), names the fork in one sentence (Postgres-backed simplicity vs a Redis-backed queue runtime), picks the standard effort level because this is an infrastructure change, and dispatches two consult-side agents in one message with no conversation history. Verifies factual claims (e.g. polling load at 2,000 jobs/day) before reporting. Report has common ground, each side, the actual disagreement, a recommendation, a minority warning, and a reopen-when threshold. Notes both sides ran on the same model family. Does not implement anything.",
+      "name": "light-local-tradeoff",
+      "prompt": "Earlier you suggested caching our currency exchange-rate lookups in process memory with a 10-minute TTL, instead of calling the rates API on every checkout request (one service, 3 instances, about 50 checkouts a minute). Second opinion before I merge?",
+      "expected_output": "Sizes it as light (a local, cheap-to-undo change to one lookup). Freezes a neutral brief with unknowns marked, names the fork (fresh rates on every request vs lower latency and API cost with up to 10 minutes of staleness), dispatches ONE consult-side call with YOUR SIDE: BOTH and no conversation history, verifies factual claims, reports with the standard sections including a reopen-when, and does not implement.",
       "files": [],
       "assertions": [
-        "Moves the review to fresh readers instead of answering from its own reasoning in the same thread",
-        "Writes a neutral brief with no advocacy for the original proposal",
-        "Names the fork as a trade-off between two options in one sentence",
-        "Dispatches two sides in one message without passing the conversation history",
-        "Report includes a reopen-when threshold (an observable signal that should bring the other side back)",
-        "Does not start the migration or any implementation"
+        "Exactly one consult-side dispatch, asked to develop both sides",
+        "The brief contains no conversation history and no advocacy for the earlier suggestion",
+        "Report names the actual disagreement and a reopen-when condition",
+        "No file edits or implementation"
       ]
     },
     {
       "id": 2,
-      "prompt": "You said we must upgrade our API from Node 18 to Node 22 before next month's security audit because Node 18 is end of life. Argue both sides before I approve.",
-      "expected_output": "Recognizes that the core disagreement is factual (is Node 18 past end of life, and what the audit requires), not a values fork. Verifies the Node 18 end-of-life date against the official Node.js release schedule instead of staging a two-sided debate. Reports 'No live fork': the verified fact, why the fork collapsed, and the decisive constraint or the measurement still needed (e.g. what the audit checks). Does not dispatch two opposing sides or manufacture disagreement, and does not perform the upgrade.",
+      "name": "standard-queue-migration",
+      "prompt": "Earlier you proposed moving our background jobs from the Postgres jobs table (a worker polling with SELECT ... FOR UPDATE SKIP LOCKED every 2s) to Redis + BullMQ, because the polling adds DB load. Context: about 2,000 jobs a day, one Postgres 16 instance we already run, no Redis anywhere yet, a two-person team. Are you sure? Double check before I approve.",
+      "expected_output": "Sizes it as standard (a queue/infrastructure change), not light. Freezes a neutral brief, names the fork in one sentence, dispatches TWO consult-side calls (SIDE A and SIDE B) in the same message with no conversation history. Verifies factual claims (e.g. the polling load at 2,000 jobs/day) before reporting. Report has common ground, both sides, the actual disagreement, a recommendation, a minority warning, a reopen-when threshold, and notes the same model family. Does not implement.",
       "files": [],
       "assertions": [
-        "Identifies the question as factual rather than a trade-off between values",
-        "Checks the Node 18 end-of-life date against an official source instead of relying on memory",
-        "Does not dispatch or simulate two opposing advocates for a factual question",
-        "Reports that there is no live fork and names what would still need checking",
+        "Two consult-side dispatches, one per side, in the same assistant message",
+        "Neither brief contains conversation history or argues for the original proposal",
+        "The fork is named as a trade-off in one sentence",
+        "Report includes a reopen-when threshold and notes both sides ran on the same model family",
+        "No implementation"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "deep-irreversible-migration",
+      "prompt": "You proposed migrating our user data from MongoDB to Postgres this quarter: about 2M users across 40 collections, and our iOS and Android apps call the API directly, so old app versions stay in the wild for months. Are you sure? This one is hard to undo.",
+      "expected_output": "Sizes it as deep (data migration, hard to reverse). Dispatches two consult-side calls in one message, then a second round where each side receives the other side's block and steelmans it before answering. Verifies factual claims, reports with all sections including a minority warning and reopen-when, and does not start the migration.",
+      "files": [],
+      "assertions": [
+        "Two first-round consult-side dispatches in the same message",
+        "A second round in which each side receives the other side's output",
+        "Report includes a minority warning and a reopen-when threshold",
+        "No implementation or migration steps executed"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "hard-requirement-collapses-fork",
+      "prompt": "You proposed sending our customer payment records to a US-hosted analytics SaaS so we can skip building our own reporting. Our customer contract requires that all customer data stays in our EU region. Double check this before I sign up for the tool.",
+      "expected_output": "Recognizes that the proposal violates a stated hard requirement (data must stay in the EU), so there is no live fork. Does not dispatch opposing sides. Reports No live fork: the decisive constraint, why the fork collapsed, and what would be needed to reopen it (for example an EU-hosted option or a contract change). Does not sign up or implement.",
+      "files": [],
+      "assertions": [
+        "Identifies the EU data-residency requirement as violated by the proposal",
+        "Does not dispatch two opposing consult-side advocates",
+        "Reports that there is no live fork and names what would reopen it",
+        "No implementation"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "factual-question-no-debate",
+      "prompt": "You said we must upgrade our API from Node 18 to Node 22 before next month's security audit because Node 18 is end of life. Argue both sides before I approve.",
+      "expected_output": "Treats 'is Node 18 end of life' as a fact, not a fork: checks it against the official Node.js release schedule itself (WebFetch or WebSearch) and reports it settled with the source. Says the fact is not a matter of sides. Does not dispatch consult-side advocates on the fact. If a real decision remains (which version to move to), names it and offers to consult on it without starting. Does not perform the upgrade.",
+      "files": [],
+      "assertions": [
+        "Checks the Node 18 end-of-life date against an official source in this session",
+        "Says plainly that the end-of-life question is settled fact, not a matter of sides",
+        "Does not dispatch consult-side advocates to argue the fact",
+        "Any remaining decision is offered, not started",
         "Does not perform the upgrade"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "mid-implementation-stop",
+      "prompt": "You're about halfway through splitting the billing module out of our monolith into its own service (new repo, its own Postgres schema, calls back to the monolith over HTTP). Wait. Are you sure this is the right call? Don't keep going until we know.",
+      "expected_output": "Stops implementation. Sizes it as standard or deep (service split, its own data store). Freezes a neutral brief that describes the plan and the work already done, dispatches two consult-side calls in one message with no conversation history, verifies claims, reports with all sections, and ends with the user deciding. Makes no further edits.",
+      "files": [],
+      "assertions": [
+        "Makes no further implementation steps or file edits",
+        "Two consult-side dispatches in the same message",
+        "The brief includes what has already been built so far",
+        "Ends by leaving the decision to the user"
       ]
     }
   ]

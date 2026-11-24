@@ -3,6 +3,7 @@ name: consult-side
 description: One side of an independent design review for the consult skill. Use when a frozen proposal brief and a named fork (optimize for A at cost X, or B at cost Y) exist and you need the strongest complete case for ONE assigned side, developed by a reader who has not seen the conversation. Dispatch two in one message (one per side) for a standard consult, or one asked to develop both sides for a light one. Never pass conversation history; the brief is the whole input.
 tools: Read, Grep, Glob
 model: opus
+effort: high
 color: purple
 ---
 
