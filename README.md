@@ -117,7 +117,7 @@ On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/b
 - `plan-redteam-gate.sh` blocks leaving plan mode until the plan has a red-team pass (or a `red-team: skip - <reason>` line). Remove its two entries in `settings.json` if that's too strict for you.
 - The router (`hooks/skill-router.md`) names third-party skills. Rows for skills you didn't install simply don't apply.
 - `costly_loop.py` blocks and bounces some of Claude's commands (see Hooks). If that's not for you, remove its three entries in `settings.json` and the two `BASH_*_TIMEOUT_MS` lines, or set `CL_DISABLE=1` in `env`.
-- `CLAUDE.md` assumes some CLIs: `jq` (required by the hooks), Python 3 (for `costly_loop.py`; without it that hook stays off), `uv`, `markitdown` and [`rtk`](https://github.com/rtk-ai/rtk) for compact command output (bootstrap installs all of these; `settings.json` sets `RTK_SUPPRESS_HOOK_WARNING=1` because rtk is used manually, without its hook).
+- `CLAUDE.md` assumes some CLIs: `jq` (required by the hooks), Python 3 (for `costly_loop.py`; without it the hook exits quietly), `uv`, `markitdown` and [`rtk`](https://github.com/rtk-ai/rtk) for compact command output (bootstrap installs all of these; `settings.json` sets `RTK_SUPPRESS_HOOK_WARNING=1` because rtk is used manually, without its hook).
 - `CLAUDE.md` has an Environment section with Windows-specific rules (PowerShell profile path, Git Bash quirks). Rewrite it for your machine first.
 - `settings.json` sets `"defaultMode": "auto"` and my auto-mode allow and deny rules. Review them before you use the setup.
 - `bootstrap.sh --capture` copies your live PowerShell profile and oh-my-posh config back into `dotfiles/`.

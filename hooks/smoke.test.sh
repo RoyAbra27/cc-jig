@@ -21,6 +21,31 @@ hook 0 no-questions.sh '{"hook_event_name":"UserPromptSubmit","prompt":"hi"}'
 hook 0 lint-on-save.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.md"}}'
 hook 0 session-context.sh '{"hook_event_name":"SessionStart","source":"startup"}'
 
+# settings.json: repo hooks run through bash (file mode is irrelevant), and every repo hook
+# command plus the status line starts on this OS (not 126/127) when run verbatim
+S="$DIR/../settings.json"
+CLT=$(mktemp -d)
+export CL_STATE="$CLT/state" CL_LOG="$CLT/log.jsonl" CL_DURATIONS="$CLT/dur"
+while IFS= read -r cmd; do
+  case "$cmd" in *skills/impeccable*) continue ;; esac
+  case "$cmd" in
+    */.claude/hooks/*.sh*)
+      case "$cmd" in *'bash "$HOME/.claude/hooks/'*) ;; *) echo "FAIL settings hook not run via bash: $cmd"; FAIL=1 ;; esac ;;
+  esac
+  printf '{}' | sh -c "$cmd" >/dev/null 2>&1
+  rc=$?
+  if [ "$rc" -eq 126 ] || [ "$rc" -eq 127 ]; then echo "FAIL settings command cannot start (exit $rc): $cmd"; FAIL=1; fi
+done < <(jq -r '(.hooks[][].hooks[].command), .statusLine.command' "$S")
+
+# costly_loop command with no python on PATH exits 0 quietly
+mkdir -p "$CLT/bin"
+printf '#!%s\nexec %s "$@"\n' "$BASH" "$BASH" > "$CLT/bin/bash"; chmod +x "$CLT/bin/bash"
+cmd=$(jq -r '[.hooks[][].hooks[].command | select(test("costly_loop"))][0]' "$S")
+err=$(printf '{}' | PATH="$CLT/bin" "$BASH" -c "$cmd" 2>&1 >/dev/null); rc=$?
+if [ "$rc" -ne 0 ] || [ -n "$err" ]; then echo "FAIL costly_loop without python (exit $rc): $err"; FAIL=1; fi
+unset CL_STATE CL_LOG CL_DURATIONS
+find "$CLT" -type f -delete; find "$CLT" -depth -type d -exec rmdir {} \;
+
 # install-skills.sh marks hallmark user-invoke-only without touching the rest of the file
 T=$(mktemp -d)
 mkdir -p "$T/hallmark"
