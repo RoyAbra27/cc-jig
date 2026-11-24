@@ -12,6 +12,7 @@
 !/bootstrap.sh
 !/README.md
 !/LICENSE
+!/.github/
 /skills/*-workspace/
 # Local eval runs (prompts, graders, HTML reports): never published
 evals-cc/

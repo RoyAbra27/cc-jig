@@ -64,7 +64,8 @@ done
 for s in hallmark unslop; do
   HM="$SKILLS_DIR/$s/SKILL.md"
   if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
-    sed -i '0,/^name:/s//disable-model-invocation: true\nname:/' "$HM" && echo "patched   $s (user-invoke only)"
+    # awk, not sed -i: GNU and BSD (macOS) sed disagree on -i and on the 0,/re/ address
+    awk '!d && /^name:/ {print "disable-model-invocation: true"; d=1} {print}' "$HM" > "$HM.tmp" && mv "$HM.tmp" "$HM" && echo "patched   $s (user-invoke only)"
   fi
 done
 
