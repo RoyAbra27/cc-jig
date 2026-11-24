@@ -14,3 +14,4 @@ description: The user's testing requirements and workflow - TDD, bug-repro-test-
 - Expected values come from an independent source (a literal, a spec, a hand-worked example), never recomputed the way the code computes them; a test that mirrors the implementation passes when both are wrong.
 - Build in vertical slices: one test plus the code that passes it end to end, then the next. Do not write all tests for a layer before any implementation.
 - Run the relevant test file after writing - verify it passes locally before claiming done.
+- A flaky test is a bug to fix (race, shared state, real clock, test order), not to rerun: never add a retry, sleep or skip to make it pass. A rerun habit teaches the agent to retry instead of fixing the code.
