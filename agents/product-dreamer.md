@@ -16,7 +16,7 @@ Procedure:
 3. Open the primary page (WebFetch) for every source you cite, and quote or state the fact it holds. A claim seen only in a search summary is marked UNVERIFIED.
 4. Go wide (at least 30 raw ideas), then keep the best 12-15. Drop any idea that breaks a CONSTRAINT. Mark 2-4 bold bets. For each idea ask: what moment in the user's week does it change, and would they notice its absence?
 
-Write the result to OUT_FILE, then return the same content, exactly these fields:
+Write the result to OUT_FILE with exactly these fields, then return only the OUT_FILE path, `top_3` and `caveats` (the caller reads the file for the rest):
 
 1. `north_star`: one paragraph on what "another level" means for this product.
 2. `ideas`: ranked 12-15, each {title, one_line, status (new / deepens roadmap / built), user_moment, why_it_wins, evidence (1-3 URLs with the fact each holds), trust_risk (how it could break a constraint, and the guard), cost (running cost and any new logins or accounts), effort (S/M/L), bold (yes/no)}.

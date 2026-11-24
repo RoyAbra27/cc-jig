@@ -1,6 +1,7 @@
 ---
 name: builder
 description: Implements one well-scoped code change from a complete brief and proves it with the brief's check. Use when the main thread has a self-contained task (a mechanical refactor, an isolated module, a test file, a scripted migration) with a "Done when:" command. Not for exploratory work, design decisions, or tasks whose spec is still emerging.
+tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 color: green
 ---
