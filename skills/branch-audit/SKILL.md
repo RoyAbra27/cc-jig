@@ -19,7 +19,7 @@ Cost: about 130-230k tokens per lane on Opus, ~1-1.5M per audit. Say so before d
 Fill `references/brief-template.md` into a file next to the package. It carries the system summary, inputs, hard rules (read-only, no tests that reset shared DBs, no secrets or real data printed, no subagents) and the fixed finding format. Every lane reads it first; the lane prompt adds only scope.
 
 ### 3. Pick lanes and dispatch in one message
-Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `conformance`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Dispatch all chosen lanes in ONE message, background, `model: opus`, general-purpose (or the matching expert agent type, e.g. `nestjs-expert` for a NestJS API surface). Each writes `audit-<lane>.md` and replies with counts and Important+ titles only.
+Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `conformance`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Dispatch all chosen lanes in ONE message, background, `model: opus`, general-purpose; when the backend framework has a file in `~/.claude/skills/backend-api/references/` (e.g. `nestjs.md`), tell the `api-surface` lane to read it. Each writes `audit-<lane>.md` and replies with counts and Important+ titles only.
 
 While they run, relay each completion to the user in two or three lines: counts, and the Important titles in plain words. Don't wait silently for all of them.
 

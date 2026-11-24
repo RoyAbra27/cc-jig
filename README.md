@@ -79,6 +79,7 @@ bootstrap.sh       new-machine setup
 | [`prompt-shake`](skills/prompt-shake/SKILL.md) | After editing a prompt file (CLAUDE.md, a skill, an agent). Tightens it so rules don't only grow |
 | [`frontend-flow`](skills/frontend-flow/SKILL.md) | UI work. Chains Impeccable, unslop and the Android skills instead of picking one |
 | [`parallel-ticket-delivery`](skills/parallel-ticket-delivery/SKILL.md) | Several independent tickets, each shipped as its own PR by a parallel worktree agent. It proves file-disjointness first, writes one shared brief, reruns every agent's check, and reports to you only when a decision is needed |
+| [`backend-api`](skills/backend-api/SKILL.md) | Build-time decisions for endpoints, jobs and migrations in any framework (auth per route, idempotency, backward-compatible migrations, timeouts), with framework facts from current docs and a NestJS gotchas file |
 
 ### Agents
 
@@ -89,7 +90,6 @@ bootstrap.sh       new-machine setup
 | [`library-scout`](agents/library-scout.md) | The outward research lane for `buy-vs-build`: verified candidates, never a verdict |
 | [`consult-side`](agents/consult-side.md) | Argues one side of a `consult` from a frozen brief |
 | [`plan-redteam-lead`](agents/plan-redteam-lead.md) | The skeptical team lead for `plan-redteam` |
-| [`nestjs-expert`](agents/nestjs-expert.md) | NestJS modules, DI, guards, interceptors, microservices |
 | [`product-dreamer`](agents/product-dreamer.md) | Product-vision research: ranked feature ideas, each with cited evidence, user moment, trust risk, cost and effort, plus patterns to steal and anti-patterns |
 | [`hebrew-copywriter`](agents/hebrew-copywriter.md) | Native Israeli Hebrew for any medium (UI, video, decks, marketing, email, social, docs): rewrites translated-sounding drafts, keeps terms consistent, handles gendered address and mixed-direction text |
 

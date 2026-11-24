@@ -13,7 +13,7 @@ When a situation below applies, use the listed skill or agent and say so in one 
 | A self-contained code change with a runnable check, delegated off the main thread | `builder` agent; brief ends with `Done when: <command>`, which you rerun before accepting |
 | The user says "reflect", "what went wrong", "learn from this session" | `/reflect` (the final `/save-session` runs it too) |
 | "Where is X used", "how does Y work", "which files touch Z" across many files | `explore-cheap` agent, not the built-in Explore |
-| NestJS module, DI, guard, interceptor, pipe, microservice design | `nestjs-expert` agent |
+| Writing or changing an endpoint, worker, queue job, webhook or migration in any backend framework (NestJS, Express, FastAPI...), or framework DI/middleware/shutdown bugs | `backend-api` (build-time decisions; framework facts via context7 at the project's version) |
 | Product ideas, "what would make this 10x", "dream up features", competitor or UX research for a roadmap | `product-dreamer` agent; `anthropic-skills:deep-research` instead for a broad multi-source report outside one product |
 | Drafting or translating any Hebrew text people will read (UI strings, video, deck, marketing, email, social, docs) | `hebrew-copywriter` agent, before it ships |
 | Just edited CLAUDE.md, a SKILL.md, an agent, a hook, or this file | `prompt-shake` on the diff |

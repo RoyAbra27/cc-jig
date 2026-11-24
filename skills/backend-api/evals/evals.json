@@ -1,0 +1,30 @@
+{
+  "skill_name": "backend-api",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "add a POST /orders/:id/refund endpoint to our express api (src/routes/orders.ts), it calls stripe and marks the order refunded in postgres. keep it simple",
+      "expected_output": "Reads package.json for versions first. Before writing, names the decisions that apply: owner/tenant authorization on the order, idempotency (a repeated refund request or client retry must not refund twice: idempotency key or a state check inside a transaction, plus Stripe's idempotency key), a timeout on the Stripe call with no blind retry, one error body shape, and no card or customer data in logs. Writes a contract-level test covering the double-refund and the unauthorized case.",
+      "files": [],
+      "assertions": [
+        "Reads the project's versions (package.json or lockfile) before version-specific claims",
+        "Handles a repeated refund request so it cannot refund twice",
+        "Checks that the caller owns or may act on that order, not only that they are logged in",
+        "Sets a timeout on the Stripe call and does not retry it blindly",
+        "Plans a test for the double-refund or unauthorized case"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "we need users.display_name to be required (NOT NULL) and drop the old users.nickname column, write the migration. app runs 3 instances behind a load balancer with rolling deploys",
+      "expected_output": "Does not ship NOT NULL and DROP in one migration. Splits into expand then contract: add display_name nullable or with a default, backfill from nickname, switch code to read display_name, enforce NOT NULL after the backfill, and drop nickname in a later release once no running instance reads it. Explains that old instances keep running during the rolling deploy.",
+      "files": [],
+      "assertions": [
+        "Does not add NOT NULL and drop nickname in the same single migration",
+        "Backfills display_name before enforcing NOT NULL",
+        "Drops nickname only in a later step or release, after no running code reads it",
+        "Names the rolling deploy (old instances still running) as the reason"
+      ]
+    }
+  ]
+}
