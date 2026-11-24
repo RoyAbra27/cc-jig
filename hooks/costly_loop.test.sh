@@ -143,6 +143,40 @@ printf '%s' "$LIST" | grep -q 'e.g. `uv run pytest -q tests/b`' || { echo "FAIL:
 [ -z "$(CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$TMP/elsewhere")" ] || { echo "FAIL: list for a repo with no history"; FAIL=1; }
 [ -z "$(CL_NOW=$((T + 31 * 86400)) "$PY" "$DIR/costly_loop.py" --slow-list "$REPO")" ] || { echo "FAIL: 30-day prune"; FAIL=1; }
 
+# Learned slowness expires 14 days after the last foreground measurement; background runs do not renew it
+R2="$TMP/repo2"; mkdir -p "$R2/.git"
+post_bg() { ev 0 "post bg $1" PostToolUse Bash "$(jq -n --arg c "$1" '{command: $c, run_in_background: true}')"; }
+SID=e1 CWD="$R2" run 'expiry slow 1' 'npm run e2e' 70000
+SID=e1 CWD="$R2" run 'expiry slow 2' 'npm run e2e' 70000
+SID=e1 CWD="$R2" ev 0 'grep' PreToolUse Grep '{"pattern":"x"}'
+SID=e1 CWD="$R2" pre 2 'fresh slow step bounces' 'npm run e2e'
+SID=e1 CWD="$R2" post_bg 'npm run e2e'
+T=$((T + 15 * 86400))
+SID=e1 CWD="$R2" pre 0 'slow step measured 15 days ago no longer bounces' 'npm run e2e'
+SID=e2 CWD="$R2" run 'fresh slow 1' 'npm run lint:all' 70000
+SID=e2 CWD="$R2" run 'fresh slow 2' 'npm run lint:all' 70000
+LIST=$(CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$R2")
+{ printf '%s' "$LIST" | grep -q 'lint:all' && ! printf '%s' "$LIST" | grep -q 'e2e'; } \
+  || { echo "FAIL: slow list must show only the fresh step: $LIST"; FAIL=1; }
+
+# Concurrent writers never leave a torn durations file, and the prune never deletes it mid-write
+R3="$TMP/repo3"; mkdir -p "$R3/.git"
+for round in 1 2 3 4 5; do
+  for i in $(seq 1 20); do
+    jq -n --arg c "npm run t$i" --arg r "$R3" \
+      '{hook_event_name: "PostToolUse", session_id: "c", tool_name: "Bash", tool_input: {command: $c}, duration_ms: 1000, cwd: $r}' \
+      | CL_NOW=$T CL_STATE="$TMP/state-c$i" "$PY" "$DIR/costly_loop.py" 2>/dev/null &
+  done
+  CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$R3" >/dev/null 2>&1 &
+  wait
+  n=$(ls "$CL_DURATIONS" | grep -c '\.json$')
+  bad=$(for f in "$CL_DURATIONS"/*; do "$PY" -c 'import json,sys; json.load(open(sys.argv[1]))' "$f" 2>/dev/null || echo "$f"; done)
+  stray=$(ls "$CL_DURATIONS" | grep -v '\.json$')
+  if [ "$n" -lt 2 ] || [ -n "$bad" ] || [ -n "$stray" ]; then
+    echo "FAIL round $round: concurrent writes (json files $n, torn: $bad, stray: $stray)"; FAIL=1; break
+  fi
+done
+
 # Robustness and logging
 SID=r1 CL_DISABLE=1 pre 0 'CL_DISABLE turns the gate off' 'npx hyperframes render -o off.mp4'
 printf 'not json' | "$PY" "$DIR/costly_loop.py" 2>/dev/null || { echo "FAIL: bad input must fail open"; FAIL=1; }

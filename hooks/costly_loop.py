@@ -139,24 +139,42 @@ def load_json(p, default):
         return default
 
 
-def slow_steps(mem, bg_ms):
-    """Keys whose last 2 runs both took bg_ms or more, slowest first."""
+def save_json(p, obj):
+    """Write then rename, so a reader never loads a torn file as {} (which the prune would delete)."""
+    # ponytail: no lock, so concurrent writers can lose an update; add a lock file if counts ever matter
+    tmp = "%s.tmp%d" % (p, os.getpid())
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f)
+        os.replace(tmp, p)
+    except OSError:  # Windows refuses the replace while another process has the file open
+        pass
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def slow_steps(mem, bg_ms, now):
+    """Keys whose last 2 runs both took bg_ms or more, measured in the foreground in the last 14 days, slowest first."""
     rows = [(sum(v["last"]) / len(v["last"]), k, v) for k, v in mem.items()
-            if len(v.get("last", [])) == 2 and min(v["last"]) >= bg_ms]
+            if len(v.get("last", [])) == 2 and min(v["last"]) >= bg_ms
+            and v.get("measured", v.get("seen", 0)) >= now - 14 * 86400]
     return sorted(rows, reverse=True)
 
 
 def slow_list(cwd, now, bg_ms):
     base, path = durations_path(cwd)
-    # Prune: stale entries here, and whole files elsewhere whose newest entry is 30+ days old.
+    # Prune whole files whose newest entry is 30+ days old; slow_steps skips entries measured 14+ days ago.
     if os.path.isdir(base):
         for name in os.listdir(base):
+            if not name.endswith(".json"):
+                continue
             p = os.path.join(base, name)
             m = load_json(p, {})
             if not m or max(v.get("seen", 0) for v in m.values()) < now - 30 * 86400:
                 os.remove(p)
     mem = load_json(path, {})
-    rows = slow_steps(mem, bg_ms)[:8]
+    rows = slow_steps(mem, bg_ms, now)[:8]
     if not rows:
         return ""
     items = "; ".join("`%s` (~%ds%s)" % (k, avg / 1000, "" if v.get("example", "") in ("", k)
@@ -193,7 +211,7 @@ def main():
 
     def save():
         os.makedirs(state_dir, exist_ok=True)
-        json.dump(st, open(path, "w", encoding="utf-8"))
+        save_json(path, st)
 
     def log(rule, decision, expect="", key=""):
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
@@ -246,10 +264,10 @@ def main():
                 seg = next(s for s in segments(cmd) if step_key(s) == x)
                 e = mem.setdefault(x, {"last": []})
                 e["last"] = (e["last"] + [d["duration_ms"]])[-2:]
-                e["seen"] = now
+                e["seen"] = e["measured"] = now
                 e["example"] = " ".join(strip_prefix(seg))[:120]
             os.makedirs(base, exist_ok=True)
-            json.dump(mem, open(dpath, "w", encoding="utf-8"))
+            save_json(dpath, mem)
         save()
         return 0
 
@@ -328,7 +346,7 @@ def main():
     if (not bg and not d.get("agent_id") and os.environ.get("CLAUDE_CODE_ENTRYPOINT") != "sdk-cli"
             and not POLL_RE.search(unquoted(cmd))):
         mem = load_json(durations_path(d.get("cwd"))[1], {})
-        slow = [(avg, x) for avg, x, _ in slow_steps({x: mem[x] for x in keys(cmd) if x in mem}, bg_ms)]
+        slow = [(avg, x) for avg, x, _ in slow_steps({x: mem[x] for x in keys(cmd) if x in mem}, bg_ms, now)]
         if slow:
             avg, x = slow[0]
             if FG_RE.search(cmd):
