@@ -4,7 +4,7 @@ One block per audit. Cut or merge a lane with no unique Important+ across three 
 
 Entries use project codenames and finding classes only: never product names, branch names, SHAs, ticket IDs or bug specifics.
 
-Codenames: **Project A** = API + worker backend with a data-ingestion pipeline; **Project A client** = its Android app; **Project B** = TS/Hono web app with Docker.
+Codenames: **Project A** = API + worker backend with a data-ingestion pipeline; **Project A client** = its Android app; **Project B** = TS/Hono web app with Docker; **Project C** = a public agent-config repo (hooks, prompt files, bootstrap, CI).
 
 ## 2026-10-27 Project A, feature branch (41 commits; 11 lanes, pre-skill layout)
 
@@ -144,3 +144,14 @@ Lanes: data-path, ui-ux, conformance, omissions, then cleanup added on request (
 | omissions | 7 | 3 | 4 | 0 (shared the Critical) | 0 |
 | cleanup | 7 | 0 | 6 | 0 | 0 |
 Notes: the only Critical was pre-existing code reachable from a new angle (an entry point that stays open while a long-running mode is active), found independently by data-path and omissions; data-path had the right mechanism. ui-ux again found the unique Important by walking the second pass through a control (an action repeated in the same burst). A copy rule enforced by a test was broken in a resource type the test did not read (plurals); two lanes caught it, so ask lanes to check what each guard test actually parses. Cleanup was Nit-only, as predicted for a ponytail-style lane: fold it into the code lanes' closing section unless the user asks. Zero unique Important+ this run: data-path, conformance, omissions, cleanup (conformance: second run in a row; consider merging it into the consolidator per the earlier note).
+
+## 2026-11-24 Project C, one day of commits (27 commits, +1.7k; no feature branch, range = the day's commits)
+Lanes adapted to a config repo: hooks (data-path/api-surface analogue for hook scripts), public-leak (privacy analogue: private details in a public repo), deploy (bootstrap, CI, supply chain), conformance (consistency between rules, plans, prompt files and hooks), omissions. 37 raw -> 25 merged (13 FIX-CODE, 4 USER-DECISION, 4 FIX-DOCS, 3 DEFER, 2 DROP), 1 Critical.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| hooks | 11 | 3 | 8 | 0 (shared the Critical) | 1 |
+| public-leak | 2 | 0 | 2 | 0 | 0 |
+| deploy | 10 | 2 | 8 | 3 (+ shared the Critical) | 0 |
+| conformance | 5 | 3 | 2 | 0 (shared the Critical) | 0 |
+| omissions | 9 | 2 | 7 | 1 | 0 |
+Notes: the Critical (hook scripts without the executable bit, run by path, plus a same-day "block on hook failure" setting, so every tool call blocks on the other OSes) was found by three lanes; tests and CI called the scripts through the interpreter and never exercised the real invocation. Ask lanes to run every configured command exactly as written. Deploy earned most (installer clash, unpinned executors, an author-only absolute path). The consolidator found a product name the leak lane missed because the leak lane was scoped to the range: scope a leak lane to HEAD plus the range. The consolidator also caught a lane fix that would have disabled a hook on the author's machine (an interpreter lookup order hitting an OS stub). Zero unique Important+ this run: hooks, public-leak, conformance (conformance: third zero in a row, so fold it into the consolidator per the earlier notes).
