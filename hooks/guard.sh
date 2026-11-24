@@ -64,8 +64,13 @@ $(git diff HEAD -U0 2>/dev/null)"
   fi
   # Added 2026-11-24 (ratchet: the CLAUDE.md heredoc rule was extended 4 times and still broken): backslashes
   # in a heredoc fed to python/node get mangled through Git Bash. Heredocs without a backslash still pass.
-  if printf '%s' "$CMD" | grep -qE '(python[0-9.]*|node)([[:space:]][^|;&<]*)?<<'; then
-    HEREDOC_BODY=$(printf '%s\n' "$CMD" | awk 'f { print } /<</ { f = 1 }')
+  if printf '%s' "$CMD" | grep -q '<<' \
+     && printf '%s' "$CMD" | grep -qE '(^|[^[:alnum:]_./-])(python[0-9.]*(\.exe)?|py|node)([[:space:]]|$)'; then
+    # Only the lines between `<<DELIM` and DELIM, so text after the terminator does not count.
+    HEREDOC_BODY=$(printf '%s\n' "$CMD" | awk '
+      f { t = $0; sub(/^\t+/, "", t); if (t == d) f = 0; else print; next }
+      /<</ { s = $0; sub(/.*<<-?[[:space:]]*/, "", s); sub(/^["'\'']/, "", s)
+             if (match(s, /^[A-Za-z0-9_]+/)) { d = substr(s, 1, RLENGTH); f = 1 } }')
     if printf '%s' "$HEREDOC_BODY" | grep -qF '\'; then
       echo "Blocked by guard hook: a heredoc fed to python/node contains a backslash, which Git Bash can mangle. Write the script to a file with the Write tool and run the file." >&2
       exit 2

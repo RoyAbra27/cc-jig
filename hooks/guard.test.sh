@@ -71,6 +71,19 @@ check 0 "cat > notes.md <<'EOF'
 a\\b
 EOF"
 check 0 'grep -n "python - <<" notes.md'
+check 0 "python - <<'EOF'
+print(1)
+EOF
+grep -E 'a\\.b' notes.md"
+check 0 "cat > bin/node <<'EOF'
+exec real-node \"\\\$@\" 2>\\&1
+EOF"
+check 2 "cat <<'EOF' | python -
+import re; print(re.sub(r'\\bx', 'y', 'x'))
+EOF"
+check 2 "python.exe - <<'EOF'
+import re; print(re.sub(r'\\bx', 'y', 'x'))
+EOF"
 
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
