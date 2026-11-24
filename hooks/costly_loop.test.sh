@@ -161,6 +161,17 @@ LIST=$(CL_NOW=$T "$PY" "$DIR/costly_loop.py" --slow-list "$R2")
 { printf '%s' "$LIST" | grep -q 'lint:all' && ! printf '%s' "$LIST" | grep -q 'e2e'; } \
   || { echo "FAIL: slow list must show only the fresh step: $LIST"; FAIL=1; }
 
+# Entries learned before `measured` existed expire 14 days after 2026-11-24, even if `seen` is fresh
+R4="$TMP/repo4"; mkdir -p "$R4/.git"; D4="$TMP/dur4"; L0=1795478400; T_SAVED=$T; T=$L0
+CL_DURATIONS="$D4" SID=l1 CWD="$R4" run 'legacy slow 1' 'npm run old' 70000
+CL_DURATIONS="$D4" SID=l1 CWD="$R4" run 'legacy slow 2' 'npm run old' 70000
+T=$T_SAVED; F4=$(ls "$D4"/*.json)
+jq --argjson s $((L0 + 20 * 86400)) 'map_values(del(.measured) | .seen = $s)' "$F4" > "$F4.new" && mv "$F4.new" "$F4"
+CL_DURATIONS="$D4" CL_NOW=$((L0 + 86400)) "$PY" "$DIR/costly_loop.py" --slow-list "$R4" | grep -q 'npm run old' \
+  || { echo "FAIL: legacy entry should still list within 14 days"; FAIL=1; }
+[ -z "$(CL_DURATIONS="$D4" CL_NOW=$((L0 + 15 * 86400)) "$PY" "$DIR/costly_loop.py" --slow-list "$R4")" ] \
+  || { echo "FAIL: legacy entry without measured must expire"; FAIL=1; }
+
 # Concurrent writers never leave a torn durations file, and the prune never deletes it mid-write
 R3="$TMP/repo3"; mkdir -p "$R3/.git"
 for round in 1 2 3 4 5; do

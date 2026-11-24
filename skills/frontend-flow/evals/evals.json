@@ -27,7 +27,7 @@
     },
     {
       "id": 5,
-      "prompt": "new marketing page for our sleep app, go through the impeccable structure roll",
+      "prompt": "new marketing page for our app, go through the impeccable structure roll",
       "expected_output": "Runs impeccable concept-seed exactly once with output redirected to a file and reads the file; never reruns the seed just to see cut-off output.",
       "files": []
     },
@@ -51,7 +51,7 @@
     },
     {
       "id": 9,
-      "prompt": "build a new hebrew landing page for our sleep app, RTL, in site/he/",
+      "prompt": "build a new hebrew landing page for our app, RTL, in site/he/",
       "expected_output": "Runs impeccable context first, then unslop as a builder: reads references/rtl.md before the passes, writes the five-line direction and waits for approval, routes Hebrew copy through hebrew-copywriter, builds with the nine passes, ends with impeccable audit and screenshots at 390 and 1440.",
       "files": []
     }

@@ -147,18 +147,23 @@ def save_json(p, obj):
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(obj, f)
         os.replace(tmp, p)
-    except OSError:  # Windows refuses the replace while another process has the file open
+    except PermissionError:  # Windows refuses the replace while another process has the file open
         pass
     finally:
         if os.path.exists(tmp):
             os.remove(tmp)
 
 
+# Entries learned before `measured` existed (all on 2026-11-24): background runs refresh `seen`, so
+# falling back to it would never expire them.
+LEGACY_MEASURED = 1795478400  # 2026-11-24T00:00Z
+
+
 def slow_steps(mem, bg_ms, now):
     """Keys whose last 2 runs both took bg_ms or more, measured in the foreground in the last 14 days, slowest first."""
     rows = [(sum(v["last"]) / len(v["last"]), k, v) for k, v in mem.items()
             if len(v.get("last", [])) == 2 and min(v["last"]) >= bg_ms
-            and v.get("measured", v.get("seen", 0)) >= now - 14 * 86400]
+            and v.get("measured", LEGACY_MEASURED) >= now - 14 * 86400]
     return sorted(rows, reverse=True)
 
 
