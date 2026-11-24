@@ -41,6 +41,7 @@ agents/            custom subagents
 commands/          slash commands: /save-session, /resume-session, /reflect
 scripts/install-skills.sh  pick and install the third-party skills (all / none / 1,2,5)
 scripts/docread.py document-to-Markdown reader; flags PDF pages with a broken text layer and renders them as image grids
+scripts/loop-metrics.py  before/after numbers for the costly-loop gate, from your own transcripts (counts only)
 dotfiles/          PowerShell profile + oh-my-posh theme
 bootstrap.sh       new-machine setup
 ```
@@ -54,6 +55,7 @@ bootstrap.sh       new-machine setup
 | [`session-context.sh`](hooks/session-context.sh) | session start, resume, clear, compact, fork | Injects working state from the repo itself (branch, uncommitted files, recent commits) plus the skill router. When the weekly setup review is due, also shows the user a one-line notice |
 | [`no-questions.sh`](hooks/no-questions.sh) | each prompt; before AskUserQuestion | A prompt saying "don't ask questions" (English or Hebrew) flags the session, and AskUserQuestion is then denied so Claude decides and names its choice. "you can ask" clears it |
 | [`lint-on-save.sh`](hooks/lint-on-save.sh) | after Edit, Write | Runs the project's own prettier and eslint on TS/JS files. Never blocks |
+| [`costly_loop.py`](hooks/costly_loop.py) | before Bash, Read, Grep, Glob; after Bash | Stops trial-and-error loops: the second blind rerun in a row of a device install or a slow (60s+) step is blocked until Claude reads or greps something, or states what it expects (`# expect:`); a full video render needs `# final`. It also learns how long each step takes per repo, lists the slow ones at session start, and sends a known-slow foreground step back to run in the background (`# fg` opts out). Together with `BASH_*_TIMEOUT_MS=90000` in `settings.json`, long commands stop blocking the conversation. Python; fails open; `CL_DISABLE=1` turns it off. Tests: `bash hooks/costly_loop.test.sh` |
 
 `settings.json` also wires Impeccable's own hook (after Edit/Write, at session start, at stop). It no-ops when Impeccable isn't installed.
 
@@ -107,14 +109,15 @@ The script installs CLI tools (winget, uv), PowerShell modules, the dotfiles, th
 
 Already have a `~/.claude`? Don't clone over it. Copy the pieces you want instead: `hooks/guard.sh` and its `settings.json` entry work on their own.
 
-On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/bootstrap.sh`: it installs the tools with Homebrew instead of winget and skips the PowerShell modules and dotfiles. On Linux it checks for the tools instead of installing them. The hooks are plain bash, and CI runs `hooks/guard.test.sh` and `hooks/smoke.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
+On macOS, install [Homebrew](https://brew.sh) and run the same `bash ~/.claude/bootstrap.sh`: it installs the tools with Homebrew instead of winget and skips the PowerShell modules and dotfiles. On Linux it checks for the tools instead of installing them. The hooks are bash, except `costly_loop.py` (Python 3), and CI runs `hooks/guard.test.sh`, `hooks/smoke.test.sh` and `hooks/costly_loop.test.sh` on macOS and Linux on every push. `CLAUDE.md`'s Environment section and the weekly setup-review reminder in `hooks/session-context.sh` are specific to my machine; delete them on yours.
 
 ### Make it yours
 
 - `guard.sh` enforces my preferences too: it blocks em-dashes in written files and `Co-Authored-By` trailers in commits. Delete those two checks if you don't share them.
 - `plan-redteam-gate.sh` blocks leaving plan mode until the plan has a red-team pass (or a `red-team: skip - <reason>` line). Remove its two entries in `settings.json` if that's too strict for you.
 - The router (`hooks/skill-router.md`) names third-party skills. Rows for skills you didn't install simply don't apply.
-- `CLAUDE.md` assumes some CLIs: `jq` (required by the hooks), `uv`, `markitdown` and [`rtk`](https://github.com/rtk-ai/rtk) for compact command output (bootstrap installs all of these; `settings.json` sets `RTK_SUPPRESS_HOOK_WARNING=1` because rtk is used manually, without its hook).
+- `costly_loop.py` blocks and bounces some of Claude's commands (see Hooks). If that's not for you, remove its three entries in `settings.json` and the two `BASH_*_TIMEOUT_MS` lines, or set `CL_DISABLE=1` in `env`.
+- `CLAUDE.md` assumes some CLIs: `jq` (required by the hooks), Python 3 (for `costly_loop.py`; without it that hook stays off), `uv`, `markitdown` and [`rtk`](https://github.com/rtk-ai/rtk) for compact command output (bootstrap installs all of these; `settings.json` sets `RTK_SUPPRESS_HOOK_WARNING=1` because rtk is used manually, without its hook).
 - `CLAUDE.md` has an Environment section with Windows-specific rules (PowerShell profile path, Git Bash quirks). Rewrite it for your machine first.
 - `settings.json` sets `"defaultMode": "auto"` and my auto-mode allow and deny rules. Review them before you use the setup.
 - `bootstrap.sh --capture` copies your live PowerShell profile and oh-my-posh config back into `dotfiles/`.
@@ -137,7 +140,7 @@ Update my Claude Code setup from https://github.com/RoyAbra27/claude-config (bra
 4. Update: git rebase <upstream>/main. On a conflict, keep the upstream change and re-apply my intent on top of it; if you can't tell what I meant, stop and ask me. Never use reset --hard, never force-push, never delete my commits.
 5. Copied pieces only: compare each file I have against the temp clone, show me what changed per file, and update only the files I approve. Keep my edits by merging them in, not by overwriting.
 6. If the update touched bootstrap.sh, scripts/install-skills.sh or .gitignore, rerun bash ~/.claude/bootstrap.sh (Windows and macOS; it skips what is already installed and asks which third-party skills I want).
-7. Check it works: jq empty ~/.claude/settings.json, then bash ~/.claude/hooks/guard.test.sh and bash ~/.claude/hooks/smoke.test.sh must both print "all cases pass".
+7. Check it works: jq empty ~/.claude/settings.json, then bash ~/.claude/hooks/guard.test.sh, bash ~/.claude/hooks/smoke.test.sh and bash ~/.claude/hooks/costly_loop.test.sh must each print "all cases pass".
 8. Report: what is new, which of my changes were kept and where, anything I need to do (usually: restart Claude Code to load new hooks and skills).
 ````
 

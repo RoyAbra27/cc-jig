@@ -61,6 +61,12 @@ for bin in $BINS; do
   fi
 done
 
+# costly_loop.py runs on python or python3; `--version` catches the Windows Store stub that command -v finds
+if ! python --version >/dev/null 2>&1 && ! python3 --version >/dev/null 2>&1; then
+  echo "Python 3 not found: hooks/costly_loop.py stays off until it is installed."
+  missing+=("python 3")
+fi
+
 step "uv tools"
 # markitdown[all] needs an Azure pre-release dependency, so list the extras explicitly
 uv tool install "markitdown[pdf,docx,pptx,xlsx,xls,outlook,audio-transcription,youtube-transcription]" || missing+=("uv markitdown")
