@@ -12,7 +12,6 @@ T=(-g -a claude-code)
 CATALOG=(
   "archify|diagrams and one-page explainers|$sk https://github.com/tt-a1i/archify --skill archify ${T[*]}"
   "impeccable|frontend design, critique and polish (+ 4 agents, design hook)|npx -y impeccable install --providers=claude --scope=global"
-  "hallmark|full visual redesign of a site|$sk nutlope/hallmark ${T[*]}"
   "unslop|turn AI-looking UI into a designed interface|$sk heydamir/unslop --skill unslop ${T[*]}"
   "security-audit|Cloudflare's security review workflow|$sk cloudflare/security-audit-skill --skill security-audit ${T[*]}"
   "codebase-design|deep-module design vocabulary (mattpocock)|$sk mattpocock/skills --skill codebase-design ${T[*]}"
@@ -21,7 +20,6 @@ CATALOG=(
   "wizard|guided bash scripts for manual steps (mattpocock)|$sk mattpocock/skills --skill wizard ${T[*]}"
   "android-material3-design-system|Material 3 theming for Android|$sk krutikJain/android-agent-skills --skill android-material3-design-system ${T[*]}"
   "android-viewsystem-foundations|XML layouts, Fragments, classic Android UI|$sk krutikJain/android-agent-skills --skill android-viewsystem-foundations ${T[*]}"
-  "developing-with-streamlit|Streamlit apps|$sk streamlit/agent-skills --skill developing-with-streamlit ${T[*]}"
 )
 
 SELECT="" DRY=0
@@ -60,13 +58,11 @@ for n in $PICK; do
   eval "$cmd" && echo "installed $name" || failed+=("skill $name")
 done
 
-# frontend-flow runs these itself; upstream lets them self-trigger and compete with Impeccable
-for s in hallmark unslop; do
-  HM="$SKILLS_DIR/$s/SKILL.md"
-  if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
-    # awk, not sed -i: GNU and BSD (macOS) sed disagree on -i and on the 0,/re/ address
-    awk '!d && /^name:/ {print "disable-model-invocation: true"; d=1} {print}' "$HM" > "$HM.tmp" && mv "$HM.tmp" "$HM" && echo "patched   $s (user-invoke only)"
-  fi
-done
+# frontend-flow runs unslop itself; upstream lets it self-trigger and compete with Impeccable
+HM="$SKILLS_DIR/unslop/SKILL.md"
+if [ "$DRY" = 0 ] && [ -f "$HM" ] && ! grep -q '^disable-model-invocation:' "$HM"; then
+  # awk, not sed -i: GNU and BSD (macOS) sed disagree on -i and on the 0,/re/ address
+  awk '!d && /^name:/ {print "disable-model-invocation: true"; d=1} {print}' "$HM" > "$HM.tmp" && mv "$HM.tmp" "$HM" && echo "patched   unslop (user-invoke only)"
+fi
 
 [ ${#failed[@]} -eq 0 ] || { printf 'failed: %s\n' "${failed[@]}" >&2; exit 1; }

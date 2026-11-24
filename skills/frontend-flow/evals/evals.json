@@ -52,13 +52,7 @@
     {
       "id": 9,
       "prompt": "build a new hebrew landing page for our sleep app, RTL, in site/he/",
-      "expected_output": "Runs impeccable context first, then unslop as a builder: reads references/rtl.md before the passes, writes the five-line direction and waits for approval, routes Hebrew copy through hebrew-copywriter, builds with the nine passes, ends with impeccable audit and screenshots at 390 and 1440. Does not run Hallmark.",
-      "files": []
-    },
-    {
-      "id": 10,
-      "prompt": "use hallmark to redesign the pricing page",
-      "expected_output": "Honors the named tool: the user named Hallmark, so it runs /hallmark redesign inside the frontend-flow steps (impeccable context and critique before, impeccable audit after) instead of unslop.",
+      "expected_output": "Runs impeccable context first, then unslop as a builder: reads references/rtl.md before the passes, writes the five-line direction and waits for approval, routes Hebrew copy through hebrew-copywriter, builds with the nine passes, ends with impeccable audit and screenshots at 390 and 1440.",
       "files": []
     }
   ]

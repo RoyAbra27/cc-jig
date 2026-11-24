@@ -21,7 +21,6 @@ __pycache__/
 # Third-party skills and agents: installed from upstream by bootstrap.sh, credited in README.md
 /skills/archify/
 /skills/impeccable/
-/skills/hallmark/
 /skills/unslop/
 /skills/security-audit/
 /skills/improve-codebase-architecture/
@@ -30,5 +29,4 @@ __pycache__/
 /skills/wizard/
 /skills/android-material3-design-system/
 /skills/android-viewsystem-foundations/
-/skills/developing-with-streamlit/
 /agents/impeccable-*.md

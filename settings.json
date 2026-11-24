@@ -15,10 +15,6 @@
     ],
     "defaultMode": "auto"
   },
-  "skillOverrides": {
-    "hallmark": "off",
-    "developing-with-streamlit": "off"
-  },
   "hooks": {
     "PreToolUse": [
       {

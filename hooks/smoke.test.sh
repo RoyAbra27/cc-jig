@@ -56,16 +56,18 @@ jq -e '.script.gate_version and (.script | has("head") and has("argv"))' "$CLT/r
   || { echo "FAIL loop-metrics report has no script stamp"; FAIL=1; }
 find "$CLT" -type f -delete; find "$CLT" -depth -type d -exec rmdir {} \;
 
-# install-skills.sh marks hallmark user-invoke-only without touching the rest of the file
+# install-skills.sh marks unslop user-invoke-only without touching the rest of the file, once
 T=$(mktemp -d)
-mkdir -p "$T/hallmark"
-printf -- '---\nname: hallmark\ndescription: x\n---\nbody name: stays\n' > "$T/hallmark/SKILL.md"
-# --select 3 is hallmark; its SKILL.md already exists, so nothing installs and only the patch runs
+mkdir -p "$T/unslop"
+printf -- '---\nname: unslop\ndescription: x\n---\nbody name: stays\n' > "$T/unslop/SKILL.md"
+# --select 3 is unslop; its SKILL.md already exists, so nothing installs and only the patch runs (twice)
 SKILLS_DIR="$T" bash "$DIR/../scripts/install-skills.sh" --select 3 >/dev/null 2>&1
-if [ "$(sed -n 2p "$T/hallmark/SKILL.md")" != "disable-model-invocation: true" ] \
-   || [ "$(grep -c '^disable-model-invocation:' "$T/hallmark/SKILL.md")" -ne 1 ] \
-   || ! grep -q '^body name: stays$' "$T/hallmark/SKILL.md"; then
-  echo "FAIL install-skills.sh frontmatter patch:"; cat "$T/hallmark/SKILL.md"; FAIL=1
+SKILLS_DIR="$T" bash "$DIR/../scripts/install-skills.sh" --select 3 >/dev/null 2>&1
+if [ "$(sed -n 2p "$T/unslop/SKILL.md")" != "disable-model-invocation: true" ] \
+   || [ "$(grep -c '^disable-model-invocation:' "$T/unslop/SKILL.md")" -ne 1 ] \
+   || [ "$(grep -c '^name: unslop$' "$T/unslop/SKILL.md")" -ne 1 ] \
+   || ! grep -q '^body name: stays$' "$T/unslop/SKILL.md"; then
+  echo "FAIL install-skills.sh frontmatter patch:"; cat "$T/unslop/SKILL.md"; FAIL=1
 fi
 find "$T" -type f -delete; find "$T" -depth -type d -exec rmdir {} \;
 
