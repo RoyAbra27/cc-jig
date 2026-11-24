@@ -16,6 +16,10 @@ hook() {
 
 hook 2 plan-redteam-gate.sh '{"tool_name":"ExitPlanMode","tool_input":{"plan":"# P\n- a"}}'
 hook 0 plan-redteam-gate.sh '{"tool_name":"ExitPlanMode","tool_input":{"plan":"# P\nred-team: skip - tiny\n- a"}}'
+LONG=$(jq -n --arg p "$(printf '# P\nred-team: skip - tiny\n'; for i in $(seq 1 29); do echo "- step $i"; done)" '{tool_name: "ExitPlanMode", tool_input: {plan: $p}}')
+hook 2 plan-redteam-gate.sh "$LONG"
+err=$(printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"/x/docs/superpowers/plans/p.md"}}' | bash "$DIR/plan-redteam-gate.sh")
+printf '%s' "$err" | grep -q '30 non-blank lines or fewer' || { echo "FAIL plan reminder omits the skip limit: $err"; FAIL=1; }
 hook 0 no-questions.sh '{"tool_name":"AskUserQuestion","tool_input":{"questions":[]}}'
 hook 0 no-questions.sh '{"hook_event_name":"UserPromptSubmit","prompt":"hi"}'
 hook 0 lint-on-save.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.md"}}'

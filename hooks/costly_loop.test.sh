@@ -52,6 +52,7 @@ run 'final on its own line passes' 'npx hyperframes render -o full.mp4
 # final' 90000
 pre 2 'second final within 20 min blocks' 'npx hyperframes render -o full2.mp4
 # final'
+grep -q 'CL_DISABLE' "$TMP/err" || { echo "FAIL: render-window block names no way out: $(cat "$TMP/err")"; FAIL=1; }
 T=$((T + 1300))
 pre 0 'final after 20 min passes' 'npx hyperframes render -o full3.mp4
 # final'

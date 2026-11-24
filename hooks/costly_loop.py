@@ -312,7 +312,9 @@ def main():
                          "to the user: put `# final` on its own line in the command.")
         if st["last_final"] is not None and now - st["last_final"] < FINAL_WINDOW:
             return block("render", "a second `# final` render within 20 minutes is a loop. Send the user the last "
-                         "one, or render only the changed span.")
+                         "one, or render only the changed span. If the user asked for this render, tell them the "
+                         "costly-loop gate blocks a second final for 20 minutes and that CL_DISABLE=1 in settings.json "
+                         "env turns the gate off; do not work around it.")
         allow("render", "final")
     elif k == "install":
         if st["last_install"] is None or st["diag"] > st["last_install"]:

@@ -28,7 +28,7 @@ fi
 if [ "$TOOL" = "Write" ] || [ "$TOOL" = "Edit" ]; then
   F=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null | sed 's#\\#/#g')
   if printf '%s' "$F" | grep -qE 'docs/superpowers/(plans|specs)/[^/]+\.md$'; then
-    jq -n --arg f "$F" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: ("Plan/spec edited: " + $f + ". Before executing it, run the plan-redteam skill (or record red-team: skip - <reason> in the file for a trivial change).")}}'
+    jq -n --arg f "$F" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: ("Plan/spec edited: " + $f + ". Before executing it, run the plan-redteam skill (or record red-team: skip - <reason> in the file for a trivial change, plans of 30 non-blank lines or fewer).")}}'
   fi
 fi
 exit 0
