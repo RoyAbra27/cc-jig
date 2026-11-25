@@ -1,0 +1,10 @@
+{
+  "name": "Cockpit",
+  "base": "dark",
+  "overrides": {
+    "userMessageBackground": "#1b2a41",
+    "diffAdded": "#14532d",
+    "diffRemoved": "#7f1d1d",
+    "bashBorder": "#f59e0b"
+  }
+}
