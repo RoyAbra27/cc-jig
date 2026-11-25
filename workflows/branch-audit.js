@@ -13,6 +13,7 @@ export const meta = {
 //   workspace: absolute dir that holds the package and audit-*.md files,
 //   repo, branch, head: for the consolidator,
 //   rulings: where binding user rulings live (path or 'none'),
+//   model: optional, default 'opus' (a cheaper model only for smoke runs),
 //   lanes: [{ name, scope }]  scope = the lanes.md text adapted to this repo, naming concrete files
 // }
 const a = args || {}
@@ -27,7 +28,7 @@ const laneReplies = await parallel(a.lanes.map(l => () =>
     `You are the ${l.name} lane of a multi-lane final audit. Read ${a.brief} first; it is your contract. ` +
     `Lane name for IDs and file: \`${l.name}\`. Write your findings to ${a.workspace}/audit-${l.name}.md.\n\n` +
     `Scope:\n${l.scope}`,
-    { label: `lane:${l.name}`, phase: 'Lanes', model: 'opus', agentType: 'general-purpose' },
+    { label: `lane:${l.name}`, phase: 'Lanes', model: a.model ?? 'opus', agentType: 'general-purpose' },
   ).then(r => ({ lane: l.name, reply: r }))
 ))
 
@@ -44,7 +45,7 @@ const merged = await agent(
   (missing.length ? ` Lanes that did not report: ${missing.join(', ')}; note the gap in Lane statistics.` : '') +
   `\n\nFollow ~/.claude/skills/branch-audit/references/consolidator.md from "Write ONE file" to the end, ` +
   `writing ${a.workspace}/audit-merged.md, and reply with ONLY what it asks for.`,
-  { label: 'consolidator', phase: 'Consolidate', model: 'opus', agentType: 'general-purpose' },
+  { label: 'consolidator', phase: 'Consolidate', model: a.model ?? 'opus', agentType: 'general-purpose' },
 )
 
 return { lanes: done, missing, consolidator: merged }
