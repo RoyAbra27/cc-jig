@@ -13,6 +13,9 @@ FLAG="$DIR/no-questions-$SID"
 case "$EVENT" in
   UserPromptSubmit)
     PROMPT=$(printf '%s' "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)
+    # Harness-injected prompts (task notifications, subagent reports) are not the user speaking.
+    # Narrowed 2026-11-25: only those tags, not every prompt starting with "<" (a pasted <div> is the user).
+    case "$PROMPT" in "<subagent"*|*"<task-notification>"*) exit 0 ;; esac
     if printf '%s' "$PROMPT" | grep -qiE "you can ask|feel free to ask"; then
       rm -f "$FLAG"
     elif printf '%s' "$PROMPT" | grep -qiE "(don'?t|do not|no need to|without) ask(ing)?( me)?( any)?( more)?( questions?)?|no questions|בלי שאלות|אל תשאל"; then

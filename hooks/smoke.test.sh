@@ -22,6 +22,14 @@ err=$(printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"/x/docs/super
 printf '%s' "$err" | grep -q '30 non-blank lines or fewer' || { echo "FAIL plan reminder omits the skip limit: $err"; FAIL=1; }
 hook 0 no-questions.sh '{"tool_name":"AskUserQuestion","tool_input":{"questions":[]}}'
 hook 0 no-questions.sh '{"hook_event_name":"UserPromptSubmit","prompt":"hi"}'
+# A subagent report quoting "don't ask" arrives as a task-notification prompt: it must not set the flag
+NQH=$(mktemp -d)
+nq() { jq -n --arg p "$1" '{hook_event_name:"UserPromptSubmit",session_id:"t1",prompt:$p}' | HOME="$NQH" bash "$DIR/no-questions.sh"; }
+nq "<task-notification><result>a prompt saying \"don't ask\" turns it off</result></task-notification>"
+[ -e "$NQH/.claude/.state/no-questions-t1" ] && { echo "FAIL no-questions flagged on a task-notification"; FAIL=1; }
+nq "ok go, don't ask me"
+[ -e "$NQH/.claude/.state/no-questions-t1" ] || { echo "FAIL no-questions missed a real \"don't ask\""; FAIL=1; }
+rm -rf "$NQH"
 hook 0 lint-on-save.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.md"}}'
 hook 0 session-context.sh '{"hook_event_name":"SessionStart","source":"startup"}'
 
