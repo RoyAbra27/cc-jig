@@ -66,7 +66,7 @@ Notes: 0 Important+ in every lane; the branch had already had a red team and a c
 
 Notes: client-contract earned most (traced the client code path for a quarantine bug and found a client-side upload queue wipe). A missing old-version signal was found by both omissions and deploy. data-path rated the quarantine bug Minor; the client-contract lane's code trace made it Important. Strikes on zero unique Important+: data-path 2, conformance 2, privacy 2, api-surface 2 (api-surface: range did not touch the API). Lesson: when the range reads another team's code, client-contract is the top lane; on an already-reviewed range, api-surface and privacy mostly return negative evidence.
 
-## 2026-11-03 Project B, phase branch (real store carts, Docker; 6 lanes + controller items)
+## 2026-11-03 Project B, phase branch (Docker; 6 lanes + controller items)
 | Lane | Raw | Duplicates | Unique verified | Unique Important+ | Dropped |
 |---|---|---|---|---|---|
 | data-path | 6 | 1 | 5 | 2 (incl. the only Critical) | 0 |
@@ -98,11 +98,11 @@ Lanes (lean, user choice): conformance, data-path (adapted to the trust path fro
 | omissions | 9 | 0 | 9 | 0 |
 Notes: a read-only probe script in the data-path lane found two invented-number paths the per-task reviews missed; for display-of-numbers branches, tell data-path to probe every figure shown. Omissions caught a deploy runbook that fails when followed literally.
 
-## 2026-11-10 Project B, whole product before first deploy (6 lanes adapted to the product: cart-trust, background, conformance, deploy, omissions, ux; plus controller items; security out of scope)
+## 2026-11-10 Project B, whole product before first deploy (6 lanes adapted to the product: money-trust, background, conformance, deploy, omissions, ux; plus controller items; security out of scope)
 85 raw -> 82 merged (31 FIX-CODE, 23 FIX-DOCS, 5 USER-DECISION, 17 DEFER, 6 DROP), 1 Critical.
 | Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
 |---|---|---|---|---|---|
-| cart-trust (data-path, adapted) | 10 | 2 | 10 | 6 | 0 |
+| money-trust (data-path, adapted) | 10 | 2 | 10 | 6 | 0 |
 | background (jobs, locks, outages) | 10 | 2 | 10 | 3 | 0 |
 | conformance | 18 | 2 | 17 | 3 | 2 |
 | deploy | 15 | 2 | 15 | 1 | 3 |

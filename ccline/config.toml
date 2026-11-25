@@ -1,0 +1,30 @@
+palette = "nord"
+skin    = "plain"
+glyphs  = "unicode"
+separator = " | "
+
+[update]
+check = false
+
+[palette_overrides]
+separator = "#616e88"
+
+[[line]]
+left  = [
+  "model", "agent", "dir", "repo", "git", "pr",
+  { metric = "context", widget = "bar", bar = "blocks", color = "ok", levels = [[35, "warn"], [50, "crit"]], coloring = "gradient" },
+  { metric = "quota.5h", widget = "bar", bar = "blocks", format = "{left} · {pct}%" },
+  { metric = "quota.7d", widget = "bar", bar = "blocks", format = "{left} · {pct}%" },
+]
+
+[subagent]
+left = [
+  { metric = "task.name", priority = 5 },
+  { metric = "task.label", icon = "", priority = 4 },
+]
+right = [
+  { metric = "task.trend", priority = 1 },
+  { metric = "context", widget = "text", format = "{pct}% · {tokens}", compact = "{tokens}", priority = 3 },
+  { metric = "model", compact = "{family}", priority = 2 },
+  { metric = "task.elapsed", priority = 3 },
+]

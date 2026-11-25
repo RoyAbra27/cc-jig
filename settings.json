@@ -172,11 +172,11 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/ccline/ccline.exe"
+    "command": "bash -c 'b=\"$HOME/.claude/ccline/ccline\"; [ -x \"$b.exe\" ] && b=\"$b.exe\"; [ -x \"$b\" ] && exec \"$b\"; command -v ccline >/dev/null && exec ccline; exit 0'"
   },
   "subagentStatusLine": {
     "type": "command",
-    "command": "~/.claude/ccline/ccline.exe"
+    "command": "bash -c 'b=\"$HOME/.claude/ccline/ccline\"; [ -x \"$b.exe\" ] && b=\"$b.exe\"; [ -x \"$b\" ] && exec \"$b\"; command -v ccline >/dev/null && exec ccline; exit 0'"
   },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
@@ -247,8 +247,8 @@
     },
     "local-mods": {
       "source": {
-        "source": "directory",
-        "path": "C:\\Users\\USER\\Desktop\\claude-mods"
+        "source": "github",
+        "repo": "RoyAbra27/claude-config"
       }
     }
   },

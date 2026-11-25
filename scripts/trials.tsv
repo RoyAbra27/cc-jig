@@ -9,3 +9,4 @@ ble-field-logcat skill	2026-11-26	"skill":"ble-field-logcat"
 render-deploy-check skill	2026-11-26	"skill":"render-deploy-check"
 branch-audit workflow	2026-11-26	"name":"branch-audit"
 tsc rewake hook	2026-11-26	error TS[0-9]+
+lint-on-save hook	2026-11-26	-
