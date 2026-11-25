@@ -155,3 +155,13 @@ Lanes adapted to a config repo: hooks (data-path/api-surface analogue for hook s
 | conformance | 5 | 3 | 2 | 0 (shared the Critical) | 0 |
 | omissions | 9 | 2 | 7 | 1 | 0 |
 Notes: the Critical (hook scripts without the executable bit, run by path, plus a same-day "block on hook failure" setting, so every tool call blocks on the other OSes) was found by three lanes; tests and CI called the scripts through the interpreter and never exercised the real invocation. Ask lanes to run every configured command exactly as written. Deploy earned most (installer clash, unpinned executors, an author-only absolute path). The consolidator found a product name the leak lane missed because the leak lane was scoped to the range: scope a leak lane to HEAD plus the range. The consolidator also caught a lane fix that would have disabled a hook on the author's machine (an interpreter lookup order hitting an OS stub). Zero unique Important+ this run: hooks, public-leak, conformance (conformance: third zero in a row, so fold it into the consolidator per the earlier notes).
+
+## 2026-11-25 Project C, pre-push range (30 commits, +1.5k)
+Lanes: hook-surface (attacker view of hook entry points), deploy (install/update path plus supply chain), privacy (public-repo leaks, HEAD plus range), omissions; conformance done by the consolidator. 41 raw -> 32 merged (22 FIX-CODE, 5 USER-DECISION, 5 FIX-DOCS, 3 DEFER, 2 DROP), 1 Critical.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| hook-surface | 10 | 4 | 7 | 3 (incl. the Critical) + 1 shared | 0 |
+| deploy | 13 | 4 | 13 | 4 + 1 shared | 0 |
+| privacy | 7 | 1 | 5 | 1 | 2 |
+| omissions | 11 | 3 | 11 | 1 | 0 |
+Notes: the Critical was an allow-exception that exited early on a per-line match, so a second line rode along; only live exit-code probes with crafted input found it, so keep asking hook lanes to feed the real script. Deploy found the one data-loss bug by reproducing it in a throwaway repo. Fix-wave lesson: a fix brief that names a "remove X" ruling should ask whether to prompt instead; the user revised one mid-wave. Every lane produced a unique Important+ this run.
