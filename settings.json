@@ -172,7 +172,11 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash -c 'export COLUMNS=$(tput cols 2>/dev/null || echo 120); plugin_dir=$(ls -d \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | awk -F/ '\"'\"'{ print $(NF-1) \"\\t\" $0 }'\"'\"' | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n | tail -1 | cut -f2-); [ -n \"$plugin_dir\" ] || exit 0; exec \"$(command -v node || echo /c/nvm4w/nodejs/node)\" \"${plugin_dir}dist/index.js\"'"
+    "command": "~/.claude/ccline/ccline.exe"
+  },
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "~/.claude/ccline/ccline.exe"
   },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
@@ -181,7 +185,7 @@
     "superpowers@claude-plugins-official": true,
     "code-review@claude-plugins-official": false,
     "typescript-lsp@claude-plugins-official": false,
-    "claude-hud@claude-hud": true,
+    "claude-hud@claude-hud": false,
     "code-simplifier@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
     "frontend-design@claude-plugins-official": false,
@@ -192,7 +196,11 @@
     "merman@merman": true,
     "agent-standup-band@double-geste": true,
     "chapters@modmyclaude": true,
-    "proof@local-mods": true
+    "proof@local-mods": true,
+    "ready@local-mods": true,
+    "shot@local-mods": true,
+    "ratchet@local-mods": true,
+    "compaction-insurance@local-mods": true
   },
   "extraKnownMarketplaces": {
     "claude-hud": {
