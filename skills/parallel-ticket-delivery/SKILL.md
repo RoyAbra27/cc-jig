@@ -43,6 +43,8 @@ STANDARDS:
  - Update the feature doc if the behavior or contract changed.
  - Run your ticket's `Done when:` command plus lint. Conventional commit, no co-author trailers.
    Push and open a PR to <integration-branch>. Never push to the integration branch.
+   If CLAUDE_JOB_DIR is set (a background session), commit and report without pushing:
+   guard.sh blocks push and gh pr create there.
  - Never dispatch subagents.
 REPORT, exactly these fields:
   status: done | failed | blocked
@@ -52,12 +54,14 @@ REPORT, exactly these fields:
   unverified: <what you could not run and why, or "nothing">
 ```
 
+**Holdout scenarios.** Before dispatching, write 1-3 acceptance checks per ticket (a command or test that exercises the behavior from outside, e.g. a curl against the new endpoint, a parser call on an edge input) to `<scratchpad>/ptd/holdout-T<n>.md`. That folder is outside every worktree, and the delta never mentions it, so no agent can tune its code to them.
+
 Dispatch every agent in ONE message: Agent tool, `isolation: "worktree"`, `run_in_background: true`, and an explicit `model` (`sonnet` by default, `opus` for tickets that need design judgment). Keep the ticket list and each agent's identity in `<scratchpad>/ptd/ledger.md`, so a compaction can't make you re-dispatch finished work.
 
 ## Step 4 - Review gate (you, per PR)
 
 When an agent reports `done`:
-1. Rerun its `check_command` in its worktree yourself. A report is a claim, not evidence.
+1. Rerun its `check_command` in its worktree yourself, then run that ticket's holdout checks there. A report is a claim, not evidence; a failed holdout goes back to the agent as the failure output only, never as the scenario text.
 2. Read the production diff and check correctness, scope (no file outside its lane), comments (nothing forbidden added, no useful comment deleted) and tests (no `.only` or `.skip`).
 3. Findings go **back to the same agent** with `SendMessage`, verbatim, since it still has the context. Don't fix it yourself. After 2 rounds that don't close it, dispatch a fresh agent on `opus` with the brief, the delta and both failure outputs.
 4. Ledger each ticket as `T<n>: done | PR <url> | review clean` or `T<n>: parked - <finding> - <why>`.
@@ -66,7 +70,7 @@ When an agent reports `done`:
 
 The user doesn't watch the agents, so don't narrate them.
 - **While it runs:** stay silent except for a `needs_owner` question or a ticket that failed past the fix cap. Batch those questions into one message. When the user asks for status, give one line per ticket.
-- **At the end:** one report in attention order: (1) decisions needed, (2) failed or parked tickets with the reason, (3) PRs ready to merge, with links. List every judgment call you made on the user's behalf.
+- **At the end:** one report in attention order: (1) decisions needed, (2) failed or parked tickets with the reason, (3) PRs ready to merge, with links. In a background session there are no PRs: list each branch with its `git push -u origin <branch>` and `gh pr create` command, as one block for the user to run. List every judgment call you made on the user's behalf.
 
 ## Worktree gotchas
 

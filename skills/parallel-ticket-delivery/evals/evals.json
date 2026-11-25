@@ -22,12 +22,45 @@
         "identifies the shared config files as an overlap",
         "does not dispatch both in parallel"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "ship tickets 51 and 52 in parallel: 51 adds GET /v1/sessions/:id/summary, 52 makes the CSV export escape quotes in notes",
+      "expected_output": "Before dispatching, writes holdout checks per ticket to <scratchpad>/ptd/holdout-T51.md and holdout-T52.md (outside the worktrees), and the deltas never mention them. After each agent reports done, reruns its check_command and then the holdout checks in that worktree. A failing holdout goes back to the same agent as failure output only, not the scenario text.",
+      "assertions": [
+        "holdout files written under the scratchpad ptd folder before any dispatch",
+        "no dispatch prompt or delta contains holdout scenario text or the holdout path",
+        "holdout checks run by the coordinator after check_command, per ticket",
+        "a holdout failure is sent back as output, without the scenario"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "(running as a background session, CLAUDE_JOB_DIR is set) ship tickets 61 and 62 in parallel, one PR each",
+      "expected_output": "The shared brief tells agents that with CLAUDE_JOB_DIR set they commit and report without pushing. No agent and not the coordinator runs git push or gh pr create. The final report lists each branch with its git push -u origin <branch> and gh pr create command in one block for the user.",
+      "assertions": [
+        "shared brief carries the CLAUDE_JOB_DIR no-push line",
+        "no git push or gh pr create is attempted by any agent or the coordinator",
+        "final report has one block with the push and PR commands per branch"
+      ]
     }
   ],
   "trigger_evals": [
-    {"query": "fan these 4 issues out to agents, one PR per issue", "should_trigger": true},
-    {"query": "ship tickets 12, 15 and 19 in parallel", "should_trigger": true},
-    {"query": "execute the plan in docs/plans/billing.md with subagents", "should_trigger": false},
-    {"query": "fix the typo in the README", "should_trigger": false}
+    {
+      "query": "fan these 4 issues out to agents, one PR per issue",
+      "should_trigger": true
+    },
+    {
+      "query": "ship tickets 12, 15 and 19 in parallel",
+      "should_trigger": true
+    },
+    {
+      "query": "execute the plan in docs/plans/billing.md with subagents",
+      "should_trigger": false
+    },
+    {
+      "query": "fix the typo in the README",
+      "should_trigger": false
+    }
   ]
 }
