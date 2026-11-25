@@ -1,17 +1,10 @@
 # Global Claude Code Instructions
 
+@personal.md
+
 ## File Reading (token efficiency)
 - For binary/rich docs (PDF, docx, pptx, xlsx, images, audio, HTML, EPub), convert with the globally-installed `markitdown` CLI before reading, to save tokens: `markitdown file.pdf -o out.md`, then read `out.md`. Skip it for plain text/code - read those directly.
 - **PDFs (added 2026-11-09):** use `uv run --script ~/.claude/scripts/docread.py file.pdf --out <scratch dir>` instead of bare markitdown; read the image grids it lists. Add `--tables` (Docling, slow) when exact tables matter.
-
-## Environment
-- PowerShell profile is the path `$PROFILE` reports (~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1), not the stale OneDrive copy; oh-my-posh config is ~/.oh-my-posh/clean-detailed.omp.json
-- When running PowerShell commands from bash, use absolute Windows paths (C:\Users\USER\...) not $HOME
-- Any `!` command suggested to the user uses absolute paths: the session cwd moves between repos and worktrees (added 2026-11-11), quoted with forward slashes, since Bash strips unquoted backslashes (added 2026-11-25)
-- **Git Bash path rewriting (added 2026-10-29):** an argument starting with `/` that is not a file path (URL path, health-check path, route) gets rewritten to `C:/Program Files/Git/...`; prefix that command with `MSYS_NO_PATHCONV=1`. Never set it globally: it breaks `/c/...` paths passed to Windows programs. A remote one-off command (Render job `--start-command`) gets no shell either: never put `$VAR`, quotes or shell syntax there, because an error echoes the expanded string (added 2026-11-11). Run a plain repo command (`<repo-cli> ...`) that reads its env itself
-- Run repo shell scripts with the Bash tool, never `bash` inside PowerShell: there it resolves to the WSL launcher (added 2026-10-29)
-- Before re-running a stopped test or smoke suite, kill leftover `node`/`python` children (`taskkill //F //T //PID <pid>`); results from a run that overlapped stale processes are invalid (added 2026-10-29)
-- Git Bash heredocs break on Hebrew text ("unexpected EOF") and mangle backslash escapes (a regex `\b` or `\1` becomes a control character): write any script with Hebrew, regex, backslashes, JS template literals (backticks) or PowerShell code to a file with the Write tool and run the file; that includes any `!` command for the user, since Bash expands `$` inside double quotes before pwsh sees it (added 2026-11-10, JS 2026-11-16, PowerShell 2026-11-24). Even in a script file, `$'...'` inside `$( )` breaks; do CR and regex work in Python (added 2026-11-15); edit files with Edit, and a patch script opens files with `newline=''` and asserts every replacement matched (added 2026-11-24)
 
 ## Git Workflow
 - Use conventional commits (feat:, fix:, refactor:, docs:, test:, chore:)
@@ -56,7 +49,3 @@
 
 ## Session Management
 - **Revised 2026-11-11:** auto-memory keeps durable facts. A long run keeps a `TASKS.md` checklist in the repo (tick items, add what you find) so state survives compaction. Use /save-session only for work that continues in a later session, at the point you stop
-
-## RTK - prefix high-output commands only
-- `rtk <cmd>` filters noisy output (unknown commands pass through). Use it only where output is large: `tsc`, `lint`, `npx jest`, `npm run <script>`, `test <cmd>`, `prisma`, `git diff|show|log`, `gh pr view|diff|checks`, `gh run view|list`, `docker logs`, `log <file>`, and `err <cmd>` for errors only
-- Not for `git status/add/commit/push/pull` or `grep/read/ls/find`; never run `rtk init -g` (its hook rewrites every Bash command)

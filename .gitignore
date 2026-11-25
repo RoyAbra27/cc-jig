@@ -10,8 +10,14 @@
 !/commands/
 !/scripts/
 !/workflows/
-!/dotfiles/
 !/bootstrap.sh
+!/update.sh
+!/mods/
+!/.claude-plugin/
+!/personal.example.md
+!/ccline/
+/ccline/*
+!/ccline/config.toml
 !/README.md
 !/LICENSE
 !/.github/
