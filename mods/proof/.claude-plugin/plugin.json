@@ -1,0 +1,5 @@
+{
+  "name": "proof",
+  "version": "0.3.0",
+  "description": "Alarm-only line under an answer: speaks only when code changed and is untested, or the last test failed. Silent when the last change was tested and passed."
+}

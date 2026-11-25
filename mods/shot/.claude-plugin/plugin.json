@@ -1,0 +1,5 @@
+{
+  "name": "shot",
+  "version": "0.1.0",
+  "description": "/shot <url> [label]: before/after screenshots with agent-browser, a Pillow pixel diff and a side-by-side compare page."
+}

@@ -1,0 +1,11 @@
+{
+  "name": "local-mods",
+  "owner": { "name": "local" },
+  "plugins": [
+    { "name": "proof", "source": "./mods/proof", "description": "Alarm-only: speaks only when code is untested or the last test failed." },
+    { "name": "ready", "source": "./mods/ready", "description": "/ready: a read-only push checklist for the current repo." },
+    { "name": "shot", "source": "./mods/shot", "description": "/shot <url> [label]: before/after screenshots, pixel diff and a compare page." },
+    { "name": "ratchet", "source": "./mods/ratchet", "description": "Counts corrections per CLAUDE.md heading and suggests a hook at 3. /ratchet lists counts." },
+    { "name": "compaction-insurance", "source": "./mods/compaction-insurance", "description": "At 65% context proposes a TASKS.md update; writes only on Write." }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "compaction-insurance",
+  "version": "0.1.0",
+  "description": "At 65% context, once per session, proposes a TASKS.md update (open todos, last exchange) and writes it only if you pick Write."
+}

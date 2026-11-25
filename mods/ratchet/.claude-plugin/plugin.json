@@ -1,0 +1,5 @@
+{
+  "name": "ratchet",
+  "version": "0.1.0",
+  "description": "Ratchet counter: counts corrections per CLAUDE.md heading (regex prefilter + Haiku classify) and suggests a hook at 3. /ratchet lists counts."
+}

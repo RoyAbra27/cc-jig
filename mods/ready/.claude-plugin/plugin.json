@@ -1,0 +1,5 @@
+{
+  "name": "ready",
+  "version": "0.1.0",
+  "description": "/ready: a read-only push checklist - unpushed commits, check at HEAD, docs touched, protected branch."
+}
