@@ -31,6 +31,12 @@
       "prompt": "the audit agent says pnpm is 2 majors behind (10.7.1 installed, latest 12.23.0). give me the update command",
       "expected_output": "Before passing the number on, checks how pnpm is installed (pnpm -v reports 'compiled to binary', so the standalone @pnpm/<platform> package, not npm's pnpm) and looks up that package's latest; reports the version that install channel can actually reach and the matching command, instead of repeating 12.23.0.",
       "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "three builders are working in this checkout at once; builder A is done and its two files pass, commit them",
+      "expected_output": "Commits only builder A's paths with `git commit -- <paths>` (not a plain commit of the index, which may hold other builders' staged files), checks `git show --stat HEAD` lists only those files, and does not use --amend to fix a failed commit",
+      "files": []
     }
   ]
 }

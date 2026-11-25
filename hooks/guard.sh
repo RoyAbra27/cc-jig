@@ -78,6 +78,12 @@ $(git diff HEAD -U0 2>/dev/null)"
     echo "Blocked by guard hook: that kills every node/python process on the machine. Kill the leftover by PID instead (find it with netstat -ano | grep :<port>, then taskkill //F //T //PID <pid>)." >&2
     exit 2
   fi
+  # Added 2026-11-25 (ratchet: "edit files with Edit" was ignored; a sed replacement holding \Users became \U,
+  # uppercasing the rest of the line). In-place sed with any backslash goes through the Edit tool instead.
+  if printf '%s' "$CMD" | grep -qE '(^|[;&|[:space:]])sed[[:space:]]+(-[a-zA-Z]*i|--in-place)' && printf '%s' "$CMD" | grep -q '\\'; then
+    echo "Blocked by guard hook: in-place sed with a backslash, which Git Bash and sed escapes can mangle (\\U uppercases, \\1 refers back). Make the change with the Edit tool." >&2
+    exit 2
+  fi
   # Added 2026-11-24 (ratchet: the CLAUDE.md heredoc rule was extended 4 times and still broken): backslashes
   # in a heredoc fed to python/node get mangled through Git Bash. Heredocs without a backslash still pass.
   if printf '%s' "$CMD" | grep -q '<<' \

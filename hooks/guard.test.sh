@@ -125,5 +125,10 @@ check 2 'adb -s emulator-5554 shell pm clear com.example.app'
 check 0 'adb install -r app.apk'
 check 0 'adb shell pm list packages'
 
+check 2 "sed -i 's#under C:\\Users\\x#y#' f.sh"
+check 2 "cd d && sed -i.bak 's/a\\(b\\)/\\1/' f"
+check 0 "sed -i 's/a/b/' f"
+check 0 "sed -n '1,5p' 'C:\\Users\\x.txt'"
+
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
