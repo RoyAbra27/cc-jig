@@ -4,7 +4,13 @@
 # bypassPermissions. Keep patterns narrow; this is a firewall, not a linter.
 INPUT=$(cat)
 command -v jq >/dev/null || { echo "Blocked by guard hook: jq is not installed, so the guard can't inspect tool calls. Install jq (winget install jqlang.jq / brew install jq / apt install jq)." >&2; exit 2; }
+# Added 2026-11-25 (audit M21): input jq can't read, or without a tool name, fails closed.
+printf '%s' "$INPUT" | jq -e '.tool_name' >/dev/null 2>&1 || { echo "Blocked by guard hook: unreadable hook input (not JSON, or no tool_name)." >&2; exit 2; }
 TOOL=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+# Added 2026-11-25 (U-1): STYLE_CHECKS=drop in local/choices (written by bootstrap.sh) skips the owner's
+# style checks (em-dash, Co-Authored-By) only; every safety rule still runs.
+STYLE=1
+grep -qx 'STYLE_CHECKS=drop' "$(dirname "${BASH_SOURCE[0]}")/../local/choices" 2>/dev/null && STYLE=""
 
 if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
   CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
@@ -12,19 +18,29 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
   # names them passes; DROP/TRUNCATE still match quoted text because SQL arrives quoted.
   # ponytail: quote stripping is per line, and `bash -c "rm -rf x"` now passes; the
   # auto-mode classifier is the backstop. Cases live in guard.test.sh.
+  # The background push block also leaves to the classifier: git aliases (alias.*), eval, sh -c, a quoted "git".
   UNQUOTED=$(printf '%s' "$CMD" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
-  # Added 2026-11-10: SDD plan workspaces are git-ignored scratch; allow rm -rf when every target is under .superpowers/sdd/.
-  if printf '%s' "$UNQUOTED" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+(\./)?\.superpowers/sdd/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi
-  # Added 2026-11-25 (user-approved): a background session's own scratch ($CLAUDE_JOB_DIR/tmp) is disposable;
-  # 4 rm -rf blocks since 11-20 were scratch cleanup. Literal variable only, so a typo can't widen it.
-  if ! printf '%s' "$UNQUOTED" | grep -q '/\.\.' && printf '%s' "$UNQUOTED" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+\$\{?CLAUDE_JOB_DIR\}?/tmp/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi
-  if printf '%s' "$UNQUOTED" | grep -qiE '(^|[[:space:];&|])rm[[:space:]]+-[a-z]*r[a-z]*f|[[:space:]]rm[[:space:]]+-[a-z]*f[a-z]*r|git[[:space:]]+push([[:space:]]+[^;&|]*)?[[:space:]](--force([[:space:]]|=|$)|-f([[:space:]]|$))'     || printf '%s' "$CMD" | grep -qiE 'DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE'; then
+  # Revised 2026-11-25 (audit M1): both rm -rf exceptions apply only to one line with no quote, backtick or /..,
+  # matched on the raw command, so a second line or a quoted target can't ride along.
+  case "$CMD" in
+    *$'\n'*|*$'\r'*|*\"*|*\'*|*\`*|*/..*) ;;
+    *)
+      # Added 2026-11-10: SDD plan workspaces are git-ignored scratch; allow rm -rf when every target is under .superpowers/sdd/.
+      if printf '%s' "$CMD" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+(\./)?\.superpowers/sdd/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi
+      # Added 2026-11-25 (user-approved): a background session's own scratch ($CLAUDE_JOB_DIR/tmp) is disposable;
+      # 4 rm -rf blocks since 11-20 were scratch cleanup. Literal variable only, so a typo can't widen it.
+      if printf '%s' "$CMD" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+\$\{?CLAUDE_JOB_DIR\}?/tmp/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi ;;
+  esac
+  # Widened 2026-11-25 (audit M6): split rm flags (-r -f, --recursive --force) and every force-push spelling
+  # (-uf, +refspec, --force-with-lease: the user runs any force push).
+  if printf '%s' "$UNQUOTED" | grep -qiE '(^|[[:space:];&|])rm[[:space:]]+-[a-z]*r[a-z]*f|[[:space:]]rm[[:space:]]+-[a-z]*f[a-z]*r|(^|[[:space:];&|])rm[[:space:]]+([^;&|]*[[:space:]])?(-[a-z]*r[a-z]*|--recursive)[[:space:]]+([^;&|]*[[:space:]])?(-[a-z]*f[a-z]*|--force)([[:space:]]|$)|(^|[[:space:];&|])rm[[:space:]]+([^;&|]*[[:space:]])?(-[a-z]*f[a-z]*|--force)[[:space:]]+([^;&|]*[[:space:]])?(-[a-z]*r[a-z]*|--recursive)([[:space:]]|$)|git[[:space:]]+push([[:space:]]+[^;&|]*)?[[:space:]](--force[a-z-]*([[:space:]]|=|$)|-[a-z]*f[a-z]*([[:space:]]|$)|\+[^[:space:];&|])'     || printf '%s' "$CMD" | grep -qiE 'DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE'; then
     echo "Blocked by guard hook: command matches a destructive pattern (rm -rf / git push --force / DROP|TRUNCATE). If this is truly intended, run it yourself in the terminal." >&2
     exit 2
   fi
   # Added 2026-11-25: background sessions (CLAUDE_JOB_DIR set; CLAUDE_CODE_SESSION_KIND does not
   # reach hooks, probed on 2.1.332) push and open draft PRs without asking. Block both; the user pushes.
-  if [ -n "$CLAUDE_JOB_DIR" ] && printf '%s' "$UNQUOTED" | grep -qE '(^|[;&|[:space:]])(git([[:space:]]+-[Cc]([[:space:]]+[^[:space:];&|]+)?)*[[:space:]]+push|gp|gh[[:space:]]+pr[[:space:]]+create)([[:space:]]|$)'; then
+  # Widened 2026-11-25 (audit M4): (git push), git.exe, /usr/bin/git, any git options, subtree push, gh pr new, gh api .../pulls.
+  if [ -n "$CLAUDE_JOB_DIR" ] && printf '%s' "$UNQUOTED" | grep -qE '(^|[;&|(`[:space:]/])(git(\.exe)?([[:space:]]+-[^[:space:];&|]+([[:space:]]+[^-[:space:];&|][^[:space:];&|]*)?)*[[:space:]]+(subtree[[:space:]]+)?push|gp|gh[[:space:]]+pr[[:space:]]+(create|new)|gh[[:space:]]+api[^;&|]*pulls)([[:space:];&|)`]|$)'; then
     REPO=$(printf '%s' "$CMD" | grep -oE "git[[:space:]]+-C[[:space:]]+(\"[^\"]+\"|'[^']+'|[^[:space:];&|]+)" | head -1 | sed -E "s/^git[[:space:]]+-C[[:space:]]+//; s/^[\"']//; s/[\"']\$//")
     REPO=$(cd "${REPO:-.}" 2>/dev/null && pwd || echo "${REPO:-$(pwd)}")
     echo "Blocked by guard hook: background sessions never push or open PRs. Commit, then tell the user to run: git -C \"$REPO\" push origin $(git -C "$REPO" branch --show-current 2>/dev/null || echo '<branch>')" >&2
@@ -44,7 +60,7 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
   # Added 2026-09-01 (ratchet): no bot attribution trailers in commits.
   # Narrowed 2026-09-02: `git commit` must start a command segment, so the strings inside a
   # quoted test script or heredoc do not trigger it.
-  if printf '%s' "$CMD" | grep -qE '(^|&&|;|\|)[[:space:]]*git[[:space:]]+commit' && printf '%s' "$CMD" | grep -qi 'co-authored-by'; then
+  if [ -n "$STYLE" ] && printf '%s' "$CMD" | grep -qE '(^|&&|;|\|)[[:space:]]*git[[:space:]]+commit' && printf '%s' "$CMD" | grep -qi 'co-authored-by'; then
     echo "Blocked by guard hook: commit message contains a Co-Authored-By trailer. Re-run the commit without any bot attribution line (CLAUDE.md rule)." >&2
     exit 2
   fi
@@ -57,9 +73,10 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
       DIFF="$DIFF
 $(git diff HEAD -U0 2>/dev/null)"
     fi
-    HIT=$(printf '%s\n' "$DIFF" | grep -E '^\+' | grep -E "$SECRET_RE" | head -3 | cut -c1-120)
+    # Revised 2026-11-25 (audit M10): name the files only; this stderr reaches the model, so never the line.
+    HIT=$(printf '%s\n' "$DIFF" | awk '/^\+\+\+ /{f=substr($0,7); next} /^\+/{print f "\t" $0}' | grep -E "$SECRET_RE" | cut -f1 | sort -u | head -3)
     if [ -n "$HIT" ]; then
-      echo "Blocked by guard hook: the diff about to be committed contains a secret-shaped string:" >&2
+      echo "Blocked by guard hook: the diff about to be committed contains a secret-shaped string in:" >&2
       printf '%s\n' "$HIT" >&2
       echo "Unstage or redact it. If it is a documented placeholder, the user commits manually." >&2
       exit 2
@@ -67,9 +84,9 @@ $(git diff HEAD -U0 2>/dev/null)"
   fi
   # Added 2026-11-16 (ratchet, 3rd credential leak into the chat): never dump
   # a credential-looking file into the chat. Counts (`wc -c`, `grep -c`) and key names still pass.
-  SECRET_FILE='([^[:space:]/\\]*(whoop|passw|cred|secret|token)[^[:space:]/\\]*\.txt|users[ _]data[^[:space:]]*\.txt|(^|[[:space:]/\\"'"'"'])\.env([[:space:]"'"'"']|$))'
+  SECRET_FILE='([^[:space:]/\\]*(passw|cred|secret|token)[^[:space:]/\\]*\.txt|users[ _]data[^[:space:]]*\.txt|(^|[[:space:]/\\"'"'"'])\.env([[:space:]"'"'"']|$))'
   if printf '%s' "$CMD" | grep -qiE "(^|[;&|(]|[[:space:]])(cat|head|tail|less|more|type|bat|Get-Content|gc|sed[[:space:]]+-n)([[:space:]][^;&|]*)?$SECRET_FILE"; then
-    echo "Blocked by guard hook: that prints a credential-looking file (whoop/password/cred/token .txt, users_data .txt, .env) into the chat. Check it with wc -c / grep -c, or read .env key names only (grep -oE '^[A-Z_]+=' .env)." >&2
+    echo "Blocked by guard hook: that prints a credential-looking file (password/cred/token .txt, users_data .txt, .env) into the chat. Check it with wc -c / grep -c, or read .env key names only (grep -oE '^[A-Z_]+=' .env)." >&2
     exit 2
   fi
   # Added 2026-11-16 (ratchet): killing every node/python by image name takes down unrelated tools
@@ -80,7 +97,7 @@ $(git diff HEAD -U0 2>/dev/null)"
   fi
   # Added 2026-11-25 (ratchet: "edit files with Edit" was ignored; a sed replacement holding \Users became \U,
   # uppercasing the rest of the line). In-place sed with any backslash goes through the Edit tool instead.
-  if printf '%s' "$CMD" | grep -qE '(^|[;&|[:space:]])sed[[:space:]]+(-[a-zA-Z]*i|--in-place)' && printf '%s' "$CMD" | grep -q '\\'; then
+  if printf '%s' "$CMD" | grep -qE '(^|[;&|[:space:]/])sed([[:space:]]+-[^[:space:]]+)*[[:space:]]+(-[a-zA-Z]*i|--in-place)' && printf '%s' "$CMD" | grep -q '\\'; then
     echo "Blocked by guard hook: in-place sed with a backslash, which Git Bash and sed escapes can mangle (\\U uppercases, \\1 refers back). Make the change with the Edit tool." >&2
     exit 2
   fi
@@ -109,7 +126,7 @@ NEW=$(printf '%s' "$INPUT" | jq -r '.tool_input.content // .tool_input.new_strin
 # Narrowed 2026-09-02: throwaway scripts in the session scratchpad are exempt; the rule is
 # about files that ship.
 TARGET=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null | tr '\\' '/')
-if printf '%s' "$NEW" | grep -qF "$EMDASH" && ! printf '%s' "$TARGET" | grep -qE 'AppData/Local/Temp/claude/|^/tmp/claude'; then
+if [ -n "$STYLE" ] && printf '%s' "$NEW" | grep -qF "$EMDASH" && ! printf '%s' "$TARGET" | grep -qE 'AppData/Local/Temp/claude/|^/tmp/claude'; then
   OLD=$(printf '%s' "$INPUT" | jq -r '.tool_input.old_string // empty' 2>/dev/null)
   if ! printf '%s' "$OLD" | grep -qF "$EMDASH"; then
     echo "Blocked by guard hook: new content contains an em-dash. Use a regular hyphen (-) per CLAUDE.md. Edits preserving existing em-dashes are allowed." >&2

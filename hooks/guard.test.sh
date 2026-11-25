@@ -46,13 +46,13 @@ check 0 'echo "git push --force is blocked"'
 check 0 'rm file.txt'
 check 0 'git push origin main'
 
-check 2 'head -c 1500 "users data/vered/whoop.txt"'
+check 2 'head -c 1500 "users data/alice/token.txt"'
 check 2 'cat ~/Downloads/users_data/notes.txt'
 check 2 'cd x && cat .env'
 check 2 'sed -n 1,5p rclone-token.txt'
 check 2 'Get-Content C:\x\passwords.txt'
 check 0 "grep -oE '^[A-Z_]+=' .env"
-check 0 'wc -c "users data/vered/whoop.txt"'
+check 0 'wc -c "users data/alice/token.txt"'
 check 2 'taskkill //F //IM node.exe //FI "WINDOWTITLE eq none"'
 check 2 'taskkill /f /im python.exe'
 check 2 'pkill node'
@@ -129,6 +129,75 @@ check 2 "sed -i 's#under C:\\Users\\x#y#' f.sh"
 check 2 "cd d && sed -i.bak 's/a\\(b\\)/\\1/' f"
 check 0 "sed -i 's/a/b/' f"
 check 0 "sed -n '1,5p' 'C:\\Users\\x.txt'"
+check 2 "sed -E -i 's/\\bx/y/' f"
+check 2 "/usr/bin/sed -i 's/a\\(b\\)/\\1/' f"
+
+# rm -rf exceptions hold only for one plain line: no second line, no quoted target
+for base in '$CLAUDE_JOB_DIR/tmp/x' '.superpowers/sdd/x'; do
+  check 2 "rm -rf $base
+rm -rf build"
+  check_bg 2 "rm -rf $base
+git push"
+  check 2 "rm -rf $base \"\$HOME\""
+  check 2 "rm -rf $base\"/../..\""
+done
+check 2 'rm -rf .superpowers/sdd/..'
+check 0 'rm -rf .superpowers/sdd/plan-1'
+
+# Force-push and recursive-delete spellings; --force-with-lease too (the user runs any force push)
+check 2 'git push -uf origin main'
+check 2 'git push origin +main'
+check 2 'git push --force-with-lease'
+check 2 'rm -r -f build'
+check 2 'rm -f -r build'
+check 2 'rm --recursive --force build'
+check 0 'git push -u origin feat'
+check 0 'git push --follow-tags origin main'
+check 0 'rm -f file.txt'
+
+# More background push and PR forms
+check_bg 2 '(git push)'
+check_bg 2 'git.exe push origin x'
+check_bg 2 '/usr/bin/git push'
+check_bg 2 'git --no-pager push'
+check_bg 2 'git -c x=y -C repo push'
+check_bg 2 'git subtree push --prefix d origin b'
+check_bg 2 'gh pr new --fill'
+check_bg 2 'gh api repos/o/r/pulls -f title=x'
+check_bg 0 'git log --oneline -5'
+check_bg 0 'gh pr view 12'
+
+# Unreadable hook input fails closed
+printf 'not json' | bash "$GUARD" 2>/dev/null; [ $? -eq 2 ] || { echo "FAIL malformed input passes"; FAIL=1; }
+
+# A secret in the staged diff blocks the commit, and the message names the file, never the secret
+SR=$(mktemp -d)
+git -C "$SR" init -q
+TOK="sk-ant-$(printf 'q%.0s' $(seq 1 30))"
+printf 'key=%s\n' "$TOK" > "$SR/conf.txt"
+git -C "$SR" add conf.txt 2>/dev/null
+GA="$(cd "$(dirname "$GUARD")" && pwd)/$(basename "$GUARD")"
+msg=$(cd "$SR" && jq -n '{tool_name: "Bash", tool_input: {command: "git commit -m x"}}' | env -u CLAUDE_JOB_DIR bash "$GA" 2>&1); rc=$?
+[ "$rc" -eq 2 ] || { echo "FAIL staged secret not blocked (got $rc)"; FAIL=1; }
+printf '%s' "$msg" | grep -q 'conf.txt' || { echo "FAIL secret message does not name the file"; FAIL=1; }
+printf '%s' "$msg" | grep -q 'qqqqqqqqqq' && { echo "FAIL secret message prints the secret"; FAIL=1; }
+rm -rf "$SR"
+
+# Style checks: em-dash and Co-Authored-By block by default; an adopter's STYLE_CHECKS=drop skips only those
+ED=$(printf '\342\200\224')
+edit() { jq -n --arg c "$2" '{tool_name: "Write", tool_input: {file_path: "/x/a.md", content: $c}}' | bash "$1" 2>/dev/null; echo $?; }
+[ "$(edit "$GUARD" "a $ED b")" = 2 ] || { echo "FAIL em-dash not blocked"; FAIL=1; }
+OPT=$(mktemp -d); mkdir -p "$OPT/hooks" "$OPT/local"
+cp "$GUARD" "$OPT/hooks/guard.sh"; echo 'STYLE_CHECKS=drop' > "$OPT/local/choices"
+[ "$(edit "$OPT/hooks/guard.sh" "a $ED b")" = 0 ] || { echo "FAIL STYLE_CHECKS=drop still blocks em-dashes"; FAIL=1; }
+GUARD="$OPT/hooks/guard.sh" bash -c '
+  t() { jq -n --arg c "$2" "{tool_name: \"Bash\", tool_input: {command: \$c}}" | env -u CLAUDE_JOB_DIR bash "$GUARD" 2>/dev/null; [ $? -eq "$1" ] || echo "FAIL STYLE_CHECKS=drop (want $1): $2"; }
+  t 0 "git commit -m \"x
+
+Co-Authored-By: Bot <b@x>\""
+  t 2 "rm -rf build"
+  t 2 "git push --force"' | grep . && FAIL=1
+rm -rf "$OPT"
 
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
