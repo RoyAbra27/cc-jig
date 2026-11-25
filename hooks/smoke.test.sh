@@ -30,6 +30,13 @@ nq "<task-notification><result>a prompt saying \"don't ask\" turns it off</resul
 nq "ok go, don't ask me"
 [ -e "$NQH/.claude/.state/no-questions-t1" ] || { echo "FAIL no-questions missed a real \"don't ask\""; FAIL=1; }
 rm -rf "$NQH"
+# A fresh install gets no setup-review reminder; one a week old does
+SCH=$(mktemp -d)
+sc() { printf '%s' '{"hook_event_name":"SessionStart","source":"startup"}' | CLAUDE_CONFIG_DIR="$SCH" bash "$DIR/session-context.sh" | grep -c 'setup review is due'; }
+[ "$(sc)" = 0 ] || { echo "FAIL session-context nags a fresh install about the setup review"; FAIL=1; }
+touch -d '8 days ago' "$SCH/.setup-review-since"
+[ "$(sc)" = 0 ] && { echo "FAIL session-context skips the review after a week"; FAIL=1; }
+rm -rf "$SCH"
 hook 0 lint-on-save.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.md"}}'
 hook 0 session-context.sh '{"hook_event_name":"SessionStart","source":"startup"}'
 

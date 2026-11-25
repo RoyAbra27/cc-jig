@@ -16,9 +16,14 @@ SOURCE=$(printf '%s' "$INPUT" | jq -r '.source // "unknown"' 2>/dev/null)
 CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 REVIEW_WEEK="$(date +%G-W%V)"
 REVIEW_DUE=""
-if [ "$SOURCE" = "startup" ] && [ "$(date +%Y%m%d)" -ge 20261118 ] && [ ! -f "$CFG/.setup-review-$REVIEW_WEEK-done" ]; then
+# Added 2026-11-25: a fresh install has nothing to review; the first review comes a week after the first session.
+[ -f "$CFG/.setup-review-since" ] || touch "$CFG/.setup-review-since" 2>/dev/null
+if [ "$SOURCE" = "startup" ] && [ ! -f "$CFG/.setup-review-$REVIEW_WEEK-done" ] \
+   && [ -n "$(find "$CFG/.setup-review-since" -mtime +6 2>/dev/null)" ]; then
   REVIEW_DUE=1
 fi
+TRIAL_STEP=""
+[ -f "$CFG/metrics/baseline-2026-11-24.json" ] && TRIAL_STEP="; (5) from 2026-12-08, if $CFG/.costly-loop-trial-done is absent: run \`python $CFG/scripts/loop-metrics.py --since 2026-11-25 --until <today> --out $CFG/metrics/trial-2026-12-08.json\`, compare it with $CFG/metrics/baseline-2026-11-24.json by the decision rules in loop-metrics.py, and touch that marker once the user decides"
 
 context() {
   echo "## Working state from the repo (session start: $SOURCE)"
@@ -41,7 +46,7 @@ context() {
   fi
 
   if [ -n "$REVIEW_DUE" ]; then
-    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) summarize the newest $CFG/reviews/setup-review-*.md (written by $CFG/scripts/weekly-review.sh; if none is from this week, tell the user to run that script, do not start it yourself) and apply only the disables the user approves; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves; (5) from 2026-12-08, if $CFG/.costly-loop-trial-done is absent: run \`python $CFG/scripts/loop-metrics.py --since 2026-11-25 --until <today> --out $CFG/metrics/trial-2026-12-08.json\`, compare it with $CFG/metrics/baseline-2026-11-24.json by the decision rules in loop-metrics.py, and touch that marker once the user decides. When done: touch $CFG/.setup-review-$REVIEW_WEEK-done"
+    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) summarize the newest $CFG/reviews/setup-review-*.md (written by $CFG/scripts/weekly-review.sh; if none is from this week, tell the user to run that script, do not start it yourself) and apply only the disables the user approves; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves$TRIAL_STEP. When done: touch $CFG/.setup-review-$REVIEW_WEEK-done"
   fi
 
   # Added 2026-09-02: skill/agent router, injected every session start (incl. compact) the
