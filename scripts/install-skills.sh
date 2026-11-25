@@ -3,9 +3,10 @@
 # Usage: bash install-skills.sh                 pick interactively
 #        bash install-skills.sh --select all|none|1,2,5
 #        add --dry-run to print the commands instead of running them
-# Already-installed skills are skipped. Exits 1 if any selected install failed.
+#        add --update to reinstall skills that are already installed
+# Already-installed skills are skipped unless --update. Exits 1 if any selected install failed.
 set -uo pipefail
-SKILLS_DIR="${SKILLS_DIR:-$HOME/.claude/skills}"
+SKILLS_DIR="${SKILLS_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills}"
 sk='npx -y skills@latest add'
 T=(-g -a claude-code)
 
@@ -22,15 +23,17 @@ CATALOG=(
   "android-viewsystem-foundations|XML layouts, Fragments, classic Android UI|$sk krutikJain/android-agent-skills --skill android-viewsystem-foundations ${T[*]}"
 )
 
-SELECT="" DRY=0
+SELECT="" DRY=0 UPDATE=0
 while [ $# -gt 0 ]; do
   case "$1" in
+    --update) UPDATE=1; shift ;;
     --select) SELECT="${2:-}"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
 
+[ "$UPDATE" = 1 ] && SELECT="${SELECT:-all}"
 if [ -z "$SELECT" ]; then
   i=1
   for row in "${CATALOG[@]}"; do
@@ -53,7 +56,9 @@ for n in $PICK; do
     echo "invalid choice: $n (expected 1-${#CATALOG[@]})" >&2; failed+=("choice $n"); continue
   fi
   IFS='|' read -r name _ cmd <<<"${CATALOG[$((n-1))]}"
-  if [ -f "$SKILLS_DIR/$name/SKILL.md" ]; then echo "ok        $name"; continue; fi
+  # --update touches only what is installed; a fresh install is the job of plain runs
+  if [ "$UPDATE" = 1 ] && [ ! -f "$SKILLS_DIR/$name/SKILL.md" ]; then continue; fi
+  if [ "$UPDATE" = 0 ] && [ -f "$SKILLS_DIR/$name/SKILL.md" ]; then echo "ok        $name"; continue; fi
   if [ "$DRY" = 1 ]; then echo "would run $cmd"; continue; fi
   eval "$cmd" && echo "installed $name" || failed+=("skill $name")
 done

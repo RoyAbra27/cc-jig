@@ -190,6 +190,12 @@ for round in 1 2 3 4 5; do
   fi
 done
 
+# A duration from an A/B harness fixture cwd (ab-fixture-*) is never learned
+RA="$TMP/ab-fixture-1"; mkdir -p "$RA/.git"
+nb=$(ls "$CL_DURATIONS" | wc -l)
+CWD="$RA" SID=ab1 post 'npm run abtest' 5000
+[ "$(ls "$CL_DURATIONS" | wc -l)" = "$nb" ] || { echo "FAIL: ab-fixture- duration was learned"; FAIL=1; }
+
 # Robustness and logging
 SID=r1 CL_DISABLE=1 pre 0 'CL_DISABLE turns the gate off' 'npx hyperframes render -o off.mp4'
 printf 'not json' | "$PY" "$DIR/costly_loop.py" 2>/dev/null || { echo "FAIL: bad input must fail open"; FAIL=1; }

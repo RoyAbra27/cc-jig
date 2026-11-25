@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
-# Weekly read-only setup review (Windows Task Scheduler, Mondays). Writes ~/Desktop/setup-review-<date>.md.
-# The data is gathered here and piped in, so the headless session needs only Read/Grep/Glob inside ~/.claude.
+# Weekly read-only setup review (run by hand, or from cron/launchd/Task Scheduler on Mondays).
+# Writes ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/reviews/setup-review-<date>.md.
+# The data is gathered here and piped in, so the headless session needs only Read/Grep/Glob inside the config dir.
 set -euo pipefail
-cd "$HOME/.claude"
-OUT="$HOME/Desktop/setup-review-$(date +%F).md"
+CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+cd "$CFG"
+mkdir -p reviews
+OUT="$CFG/reviews/setup-review-$(date +%F).md"
 NOW_MS=$(( $(date +%s) * 1000 ))
+# with CLAUDE_CONFIG_DIR set, Claude Code keeps its global state file inside it
+STATE_JSON="$CFG/.claude.json"; [ -f "$STATE_JSON" ] || STATE_JSON="$HOME/.claude.json"
 
 {
   echo "## Skill usage (name, uses, days since last use)"
   jq -r --argjson now "$NOW_MS" '.skillUsage // {} | to_entries | sort_by(-.value.usageCount)[]
-    | "\(.key)\t\(.value.usageCount)\t\((($now - (.value.lastUsedAt // 0)) / 86400000) | floor)"' "$HOME/.claude.json"
+    | "\(.key)\t\(.value.usageCount)\t\((($now - (.value.lastUsedAt // 0)) / 86400000) | floor)"' "$STATE_JSON"
   echo
-  echo "## Installed skills (folders in ~/.claude/skills and enabled plugins)"
+  echo "## Installed skills (folders in skills/ and enabled plugins)"
   ls -1 skills | grep -v -E '\-workspace$|^synced$'
   jq -r '.enabledPlugins | to_entries[] | select(.value) | .key' settings.json
   echo
@@ -22,7 +27,8 @@ NOW_MS=$(( $(date +%s) * 1000 ))
   echo "## Trials (name, since, sessions that used it since then; '-' = passive)"
   tail -n +2 scripts/trials.tsv | while IFS=$'\t' read -r name since pat; do
     if [ "$pat" = "-" ]; then n="-"; else
-      n=$(find projects -name '*.jsonl' -not -path '*/subagents/*' -newermt "$since" -print0 2>/dev/null | xargs -0 -r grep -l -E -- "$pat" 2>/dev/null | wc -l)
+      # ab-fixture- dirs are A/B harness runs, not real sessions
+      n=$(find projects -name '*.jsonl' -not -path '*/subagents/*' -not -path '*ab-fixture-*' -newermt "$since" -print0 2>/dev/null | xargs -0 -r grep -l -E -- "$pat" 2>/dev/null | wc -l)
     fi
     printf '%s\t%s\t%s\n' "$name" "$since" "$n"
   done

@@ -5,7 +5,7 @@ Counts only, never message text. Patterns and segments() come from hooks/costly_
 """
 import argparse, collections, glob, json, os, re, subprocess, sys
 
-HOME = os.path.expanduser("~/.claude")
+HOME = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~/.claude")
 SLOW_MS = 60_000
 
 
@@ -43,7 +43,7 @@ def scan(since, until):
     sessions = collections.defaultdict(lambda: collections.Counter())
     for f in glob.glob(os.path.join(HOME, "projects", "**", "*.jsonl"), recursive=True):
         proj = os.path.relpath(f, os.path.join(HOME, "projects")).split(os.sep)[0]
-        if "scratchpad" in proj or "-eval-" in proj:
+        if "scratchpad" in proj or "-eval-" in proj or "ab-fixture-" in proj:
             continue
         sid = session_of(f)
         main_session = "subagents" not in f

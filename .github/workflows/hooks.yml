@@ -12,26 +12,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v7
-      # the hooks resolve paths through $HOME/.claude, as on a real install
-      - run: ln -s "$GITHUB_WORKSPACE" "$HOME/.claude"
+      # fresh install: a clone in a temp HOME, as on a new machine; everything below runs from there
+      - name: clone into a temp HOME
+        run: |
+          mkdir -p "$RUNNER_TEMP/home"
+          git clone -q "$GITHUB_WORKSPACE" "$RUNNER_TEMP/home/.claude"
+          echo "HOME=$RUNNER_TEMP/home" >> "$GITHUB_ENV"
       - run: bash --version | head -1 && jq --version
       - name: syntax
-        run: for f in hooks/*.sh scripts/*.sh skills/*/scripts/*.sh bootstrap.sh; do bash -n "$f" || exit 1; done
-      - run: jq empty settings.json
-      - run: python3 -m py_compile hooks/*.py scripts/*.py skills/*/scripts/*.py && python3 scripts/loop-metrics.py --help
-      - run: bash hooks/guard.test.sh
-      - run: bash hooks/smoke.test.sh
-      - run: bash hooks/costly_loop.test.sh
-      # CI has no Claude Code, so bootstrap must take the Homebrew path, install, and stop at the PATH check
-      - name: bootstrap (macOS path)
-        if: runner.os == 'macOS'
+        working-directory: ${{ runner.temp }}/home/.claude
         run: |
-          out=$(bash bootstrap.sh --skills none 2>&1) || true
-          printf '%s\n' "$out"
-          printf '%s' "$out" | grep -q '== Homebrew packages'
-          printf '%s' "$out" | grep -q 'claude is not on PATH yet'
-          ! printf '%s' "$out" | grep -qE 'command not found|winget'
+          for f in hooks/*.sh scripts/*.sh skills/*/scripts/*.sh bootstrap.sh update.sh; do bash -n "$f" || exit 1; done
+          jq empty settings.json
+          PY=$(command -v python || command -v python3)
+          "$PY" -m py_compile hooks/*.py scripts/*.py skills/*/scripts/*.py && "$PY" scripts/loop-metrics.py --help
+      # the plan only: no installs, no Claude Code login needed
+      - name: bootstrap plan
+        working-directory: ${{ runner.temp }}/home/.claude
+        run: bash bootstrap.sh --dry-run --skills none
+      - name: tests
+        working-directory: ${{ runner.temp }}/home/.claude
+        run: |
+          bash hooks/smoke.test.sh
+          bash hooks/guard.test.sh
+          bash hooks/costly_loop.test.sh
+          bash hooks/update.test.sh

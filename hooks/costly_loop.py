@@ -42,6 +42,7 @@ FINAL_WINDOW = 1200
 # A3 replay 2026-11-24 (30 days, main sessions, first blind rerun free): exact 19 blocks, keys 25, and all 6
 # extra blocked reruns took under 30s. So the gate matches exact segments; keys drive durations and the bounce.
 GATE_KEYS = False
+CONFIG = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~/.claude")
 VERSION = 2  # gate rule set in loop-gate.jsonl; v2 = streaks (first blind rerun free) + step keys + bounce
 
 
@@ -128,7 +129,7 @@ def repo_root(cwd):
 
 
 def durations_path(cwd):
-    base = os.environ.get("CL_DURATIONS") or os.path.join(os.path.expanduser("~/.claude"), "state", "durations")
+    base = os.environ.get("CL_DURATIONS") or os.path.join(CONFIG, "state", "durations")
     return base, os.path.join(base, hashlib.sha1(repo_root(cwd).encode("utf-8")).hexdigest() + ".json")
 
 
@@ -201,9 +202,8 @@ def main():
         return 0
     d = json.load(sys.stdin)
     slow_ms = float(os.environ.get("CL_SLOW_MS") or 60000)
-    home = os.path.expanduser("~/.claude")
-    state_dir = os.environ.get("CL_STATE") or os.path.join(home, "state", "costly-loop")
-    log_path = os.environ.get("CL_LOG") or os.path.join(home, "metrics", "loop-gate.jsonl")
+    state_dir = os.environ.get("CL_STATE") or os.path.join(CONFIG, "state", "costly-loop")
+    log_path = os.environ.get("CL_LOG") or os.path.join(CONFIG, "metrics", "loop-gate.jsonl")
     sid = re.sub(r"[^\w-]", "_", d.get("session_id") or "nosession")
     path = os.path.join(state_dir, sid + ".json")
     st = load_json(path, {})
@@ -257,7 +257,8 @@ def main():
                 elif not bg:  # a fast foreground run clears it
                     st["slow"].pop(g, None)
                     st["blind"].pop(g, None)
-        if k is not None and not POLL_RE.search(unquoted(cmd)):
+        # runs from the A/B harness (scripts/ab-setup.sh fixtures) are not real durations
+        if k is not None and not POLL_RE.search(unquoted(cmd)) and "ab-fixture-" not in (d.get("cwd") or ""):
             base, dpath = durations_path(d.get("cwd"))
             mem = load_json(dpath, {})
             ks = keys(cmd)
@@ -375,7 +376,7 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception as e:
         try:  # leave a trace for the trial review, next to the gate log
-            log = os.environ.get("CL_LOG") or os.path.join(os.path.expanduser("~/.claude"), "metrics", "loop-gate.jsonl")
+            log = os.environ.get("CL_LOG") or os.path.join(CONFIG, "metrics", "loop-gate.jsonl")
             os.makedirs(os.path.dirname(log), exist_ok=True)
             open(os.path.join(os.path.dirname(log), "loop-gate-errors.jsonl"), "a", encoding="utf-8").write(json.dumps(
                 {"ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()), "v": VERSION, "error": type(e).__name__}) + "\n")

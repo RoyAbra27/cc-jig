@@ -13,9 +13,10 @@ SOURCE=$(printf '%s' "$INPUT" | jq -r '.source // "unknown"' 2>/dev/null)
 
 # Added 2026-11-11: setup review reminder, shown on fresh starts in any project. Weekly since
 # 2026-11-18 (one marker per ISO week), with a memory prune step.
+CFG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 REVIEW_WEEK="$(date +%G-W%V)"
 REVIEW_DUE=""
-if [ "$SOURCE" = "startup" ] && [ "$(date +%Y%m%d)" -ge 20261118 ] && [ ! -f "$HOME/.claude/.setup-review-$REVIEW_WEEK-done" ]; then
+if [ "$SOURCE" = "startup" ] && [ "$(date +%Y%m%d)" -ge 20261118 ] && [ ! -f "$CFG/.setup-review-$REVIEW_WEEK-done" ]; then
   REVIEW_DUE=1
 fi
 
@@ -40,7 +41,7 @@ context() {
   fi
 
   if [ -n "$REVIEW_DUE" ]; then
-    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) summarize the newest ~/Desktop/setup-review-*.md (written Mondays by ~/.claude/scripts/weekly-review.sh; if none is from this week, run that script) and apply only the disables the user approves; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves; (5) from 2026-12-08, if ~/.claude/.costly-loop-trial-done is absent: run \`python ~/.claude/scripts/loop-metrics.py --since 2026-11-25 --until <today> --out ~/.claude/metrics/trial-2026-12-08.json\`, compare it with ~/.claude/metrics/baseline-2026-11-24.json by the decision rules in loop-metrics.py, and touch that marker once the user decides. When done: touch ~/.claude/.setup-review-$REVIEW_WEEK-done"
+    echo "- Weekly setup review is due ($REVIEW_WEEK). Raise it in your first reply, before new work: (1) summarize the newest $CFG/reviews/setup-review-*.md (written by $CFG/scripts/weekly-review.sh; if none is from this week, tell the user to run that script, do not start it yourself) and apply only the disables the user approves; (2) run /doctor; (3) ask for the list of things Claude got wrong this week; (4) memory prune pass on the current project's memory dir: propose merges, stale facts and duplicates of CLAUDE.md, apply only what the user approves; (5) from 2026-12-08, if $CFG/.costly-loop-trial-done is absent: run \`python $CFG/scripts/loop-metrics.py --since 2026-11-25 --until <today> --out $CFG/metrics/trial-2026-12-08.json\`, compare it with $CFG/metrics/baseline-2026-11-24.json by the decision rules in loop-metrics.py, and touch that marker once the user decides. When done: touch $CFG/.setup-review-$REVIEW_WEEK-done"
   fi
 
   # Added 2026-09-02: skill/agent router, injected every session start (incl. compact) the
