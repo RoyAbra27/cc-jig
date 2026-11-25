@@ -19,6 +19,17 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
     echo "Blocked by guard hook: command matches a destructive pattern (rm -rf / git push --force / DROP|TRUNCATE). If this is truly intended, run it yourself in the terminal." >&2
     exit 2
   fi
+  # Added 2026-11-25: background sessions (CLAUDE_JOB_DIR set; CLAUDE_CODE_SESSION_KIND does not
+  # reach hooks, probed on 2.1.332) push and open draft PRs without asking. Block both; the user pushes.
+  if [ -n "$CLAUDE_JOB_DIR" ] && printf '%s' "$UNQUOTED" | grep -qE '(^|[;&|[:space:]])(git([[:space:]]+-[Cc]([[:space:]]+[^[:space:];&|]+)?)*[[:space:]]+push|gp|gh[[:space:]]+pr[[:space:]]+create)([[:space:]]|$)'; then
+    echo "Blocked by guard hook: background sessions never push or open PRs. Commit, then tell the user to run: git -C \"$(pwd)\" push origin $(git branch --show-current 2>/dev/null || echo '<branch>')" >&2
+    exit 2
+  fi
+  # Added 2026-11-25: uninstall or pm clear wipes app data on the device (sessions recorded on the phone).
+  if printf '%s' "$UNQUOTED" | grep -qE '(^|[;&|[:space:]])adb([[:space:]]+-s[[:space:]]+[^[:space:]]+)?[[:space:]]+(uninstall|shell[[:space:]]+pm[[:space:]]+clear)[[:space:]]'; then
+    echo "Blocked by guard hook: adb uninstall / pm clear deletes the app's data on the device. If intended, run it yourself in the terminal." >&2
+    exit 2
+  fi
   # Added 2026-11-09 (ported from mattpocock git-guardrails): commands that discard local work.
   # Case-sensitive on purpose: `branch -d` (merged only) must pass while `-D` blocks.
   if printf '%s' "$UNQUOTED" | grep -qE 'git[[:space:]]+(reset[[:space:]]+([^;&|]*[[:space:]])?--hard|clean[[:space:]]+([^;&|]*[[:space:]])?-[a-zA-Z]*f|branch[[:space:]]+([^;&|]*[[:space:]])?-D([[:space:]]|$)|(checkout|restore)[[:space:]]+(--[[:space:]]+)?\.([[:space:];&|]|$))'; then

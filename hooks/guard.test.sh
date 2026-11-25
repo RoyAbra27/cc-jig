@@ -91,5 +91,32 @@ check 2 "python - <<\\EOF
 import re; print(re.sub(r'\\bx', 'y', 'x'))
 EOF"
 
+# Background sessions (CLAUDE_JOB_DIR set) never push or open PRs; interactive ones still can.
+check_bg() {
+  local want="$1" cmd="$2" got
+  jq -n --arg c "$cmd" '{tool_name: "Bash", tool_input: {command: $c}}' | CLAUDE_JOB_DIR=/tmp/job bash "$GUARD" 2>/dev/null
+  got=$?
+  if [ "$got" -ne "$want" ]; then
+    echo "FAIL bg (want $want, got $got): $cmd"
+    FAIL=1
+  fi
+}
+check_bg 2 'gp'
+check_bg 2 'git push origin x'
+check_bg 2 'git -C repo push'
+check_bg 2 'git -c x=y push'
+check_bg 2 'git -c "a=b c" push'
+check_bg 2 'cd x && gh pr create --fill'
+check_bg 0 'echo "git push"'
+check_bg 0 'grep -n "gp" x'
+check_bg 0 'git status'
+check 0 'git push origin x'
+check 0 'gh pr create --fill'
+
+check 2 'adb uninstall com.example.app'
+check 2 'adb -s emulator-5554 shell pm clear com.example.app'
+check 0 'adb install -r app.apk'
+check 0 'adb shell pm list packages'
+
 [ "$FAIL" -eq 0 ] && echo "guard: all cases pass"
 exit "$FAIL"
