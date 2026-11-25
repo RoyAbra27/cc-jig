@@ -7,4 +7,6 @@ Output Markdown only, no preamble, in this order:
 3. `## Watch list` - subagent-dispatch and debugging-protocol use counts. At 0 uses, say: move their key lines into CLAUDE.md.
 4. `## Router drift` - skills named in hooks/skill-router.md that are not installed, and installed skills used 5+ times that the router never names.
 
-Keep it under 60 lines. State numbers from stdin as given; mark anything you inferred as (inferred).
+5. `## Trials` - one row per item in the stdin Trials section: name, days since its start date, sessions that used it, and a verdict: `keep` (used), `wait` (under 14 days), or `remove` (0 uses after 14+ days, with the exact uninstall or move command). Passive items (`-`) get `ask the user`. Then the Ratchet counts, if present, highest first.
+
+Keep it under 70 lines. State numbers from stdin as given; mark anything you inferred as (inferred).
