@@ -5,7 +5,7 @@ FAIL=0
 
 check() {
   local want="$1" cmd="$2" got
-  jq -n --arg c "$cmd" '{tool_name: "Bash", tool_input: {command: $c}}' | bash "$GUARD" 2>/dev/null
+  jq -n --arg c "$cmd" '{tool_name: "Bash", tool_input: {command: $c}}' | env -u CLAUDE_JOB_DIR bash "$GUARD" 2>/dev/null
   got=$?
   if [ "$got" -ne "$want" ]; then
     echo "FAIL (want $want, got $got): $cmd"
@@ -15,6 +15,10 @@ check() {
 
 check 2 'rm -rf build'
 check 2 'cd x && rm -fr build'
+check 0 'rm -rf $CLAUDE_JOB_DIR/tmp/l5 ${CLAUDE_JOB_DIR}/tmp/unz/'
+check 2 'rm -rf $CLAUDE_JOB_DIR/tmp/..'
+check 2 'rm -rf $CLAUDE_JOB_DIR/tmp/x build'
+check 2 'rm -rf $CLAUDE_JOB_DIR/tmp/x && rm -rf build'
 check 2 'git push --force origin main'
 check 2 'git push -f'
 check 2 'psql -c "DROP TABLE x"'
@@ -110,6 +114,9 @@ check_bg 2 'cd x && gh pr create --fill'
 check_bg 0 'echo "git push"'
 check_bg 0 'grep -n "gp" x'
 check_bg 0 'git status'
+# The block message names the repo the push targeted (git -C), not the session's cwd.
+msg=$(jq -n '{tool_name: "Bash", tool_input: {command: "git -C \"/some/repo\" push origin main"}}' | CLAUDE_JOB_DIR=/tmp/job bash "$GUARD" 2>&1)
+printf '%s' "$msg" | grep -q 'git -C "/some/repo" push' || { echo "FAIL bg message names the wrong repo: $msg"; FAIL=1; }
 check 0 'git push origin x'
 check 0 'gh pr create --fill'
 

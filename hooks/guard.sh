@@ -15,6 +15,9 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
   UNQUOTED=$(printf '%s' "$CMD" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
   # Added 2026-11-10: SDD plan workspaces are git-ignored scratch; allow rm -rf when every target is under .superpowers/sdd/.
   if printf '%s' "$UNQUOTED" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+(\./)?\.superpowers/sdd/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi
+  # Added 2026-11-25 (user-approved): a background session's own scratch ($CLAUDE_JOB_DIR/tmp) is disposable;
+  # 4 rm -rf blocks since 11-20 were scratch cleanup. Literal variable only, so a typo can't widen it.
+  if ! printf '%s' "$UNQUOTED" | grep -q '/\.\.' && printf '%s' "$UNQUOTED" | grep -qE '^[[:space:]]*rm[[:space:]]+-rf([[:space:]]+\$\{?CLAUDE_JOB_DIR\}?/tmp/[A-Za-z0-9._-]+/?)+[[:space:]]*$'; then exit 0; fi
   if printf '%s' "$UNQUOTED" | grep -qiE '(^|[[:space:];&|])rm[[:space:]]+-[a-z]*r[a-z]*f|[[:space:]]rm[[:space:]]+-[a-z]*f[a-z]*r|git[[:space:]]+push([[:space:]]+[^;&|]*)?[[:space:]](--force([[:space:]]|=|$)|-f([[:space:]]|$))'     || printf '%s' "$CMD" | grep -qiE 'DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE'; then
     echo "Blocked by guard hook: command matches a destructive pattern (rm -rf / git push --force / DROP|TRUNCATE). If this is truly intended, run it yourself in the terminal." >&2
     exit 2
@@ -22,7 +25,9 @@ if [ "$TOOL" = "Bash" ] || [ "$TOOL" = "PowerShell" ]; then
   # Added 2026-11-25: background sessions (CLAUDE_JOB_DIR set; CLAUDE_CODE_SESSION_KIND does not
   # reach hooks, probed on 2.1.332) push and open draft PRs without asking. Block both; the user pushes.
   if [ -n "$CLAUDE_JOB_DIR" ] && printf '%s' "$UNQUOTED" | grep -qE '(^|[;&|[:space:]])(git([[:space:]]+-[Cc]([[:space:]]+[^[:space:];&|]+)?)*[[:space:]]+push|gp|gh[[:space:]]+pr[[:space:]]+create)([[:space:]]|$)'; then
-    echo "Blocked by guard hook: background sessions never push or open PRs. Commit, then tell the user to run: git -C \"$(pwd)\" push origin $(git branch --show-current 2>/dev/null || echo '<branch>')" >&2
+    REPO=$(printf '%s' "$CMD" | grep -oE "git[[:space:]]+-C[[:space:]]+(\"[^\"]+\"|'[^']+'|[^[:space:];&|]+)" | head -1 | sed -E "s/^git[[:space:]]+-C[[:space:]]+//; s/^[\"']//; s/[\"']\$//")
+    REPO=$(cd "${REPO:-.}" 2>/dev/null && pwd || echo "${REPO:-$(pwd)}")
+    echo "Blocked by guard hook: background sessions never push or open PRs. Commit, then tell the user to run: git -C \"$REPO\" push origin $(git -C "$REPO" branch --show-current 2>/dev/null || echo '<branch>')" >&2
     exit 2
   fi
   # Added 2026-11-25: uninstall or pm clear wipes app data on the device (sessions recorded on the phone).
