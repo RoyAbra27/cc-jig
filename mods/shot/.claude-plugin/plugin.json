@@ -1,5 +1,9 @@
 {
   "name": "shot",
-  "version": "0.1.0",
-  "description": "/shot <url> [label]: before/after screenshots with agent-browser, a Pillow pixel diff and a side-by-side compare page."
+  "version": "0.1.1",
+  "description": "/shot <url> [label]: before/after screenshots with agent-browser, a Pillow pixel diff and a side-by-side compare page.",
+  "author": {
+    "name": "RoyAbra27",
+    "url": "https://github.com/RoyAbra27"
+  }
 }

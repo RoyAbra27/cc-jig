@@ -3,6 +3,9 @@ name: hooks
 on:
   push:
   pull_request:
+  # weekly, to notice Claude Code and runner drift between pushes
+  schedule:
+    - cron: '0 6 * * 1'
 
 permissions:
   contents: read
@@ -18,7 +21,24 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # adopters' Claude Code updates a plugin only when its version changes
+      - name: a changed mod bumps its version
+        if: matrix.os == 'ubuntu-latest' && github.event_name != 'schedule'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          git cat-file -e "$BASE^{commit}" 2>/dev/null || { echo "no base commit to compare against"; exit 0; }
+          fail=0
+          for d in mods/*/; do
+            git diff --quiet "$BASE" HEAD -- "$d" && continue
+            old=$(git show "$BASE:${d}.claude-plugin/plugin.json" 2>/dev/null | jq -r .version)
+            new=$(jq -r .version "${d}.claude-plugin/plugin.json")
+            [ "$old" != "$new" ] || { echo "${d} changed but its version is still $new: bump it in ${d}.claude-plugin/plugin.json"; fail=1; }
+          done
+          exit "$fail"
       # fresh install: a clone in a temp HOME, as on a new machine; everything below runs from there
       - name: clone into a temp HOME
         run: |
@@ -44,3 +64,4 @@ jobs:
           bash hooks/guard.test.sh
           bash hooks/costly_loop.test.sh
           bash hooks/update.test.sh
+          bash hooks/no-questions.test.sh

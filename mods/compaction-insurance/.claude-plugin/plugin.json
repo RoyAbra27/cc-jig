@@ -1,5 +1,9 @@
 {
   "name": "compaction-insurance",
-  "version": "0.1.0",
-  "description": "At 65% context, once per session, proposes a TASKS.md update (open todos, last exchange) and writes it only if you pick Write."
+  "version": "0.1.1",
+  "description": "At 65% context, once per session, proposes a TASKS.md update (open todos, last exchange) and writes it only if you pick Write.",
+  "author": {
+    "name": "RoyAbra27",
+    "url": "https://github.com/RoyAbra27"
+  }
 }
