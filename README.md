@@ -1,75 +1,64 @@
 # claude-config
 
-One opinionated Claude Code setup (`~/.claude`) for Windows (Git Bash), macOS and Linux: global rules, hooks that enforce them, skills, agents, small mods and a status line.
-
-The core idea is a ratchet: a repeated correction moves from a chat message to a dated `CLAUDE.md` rule to a hook that blocks the mistake, so `CLAUDE.md` stays short and the rules hold.
+An opinionated Claude Code setup (`~/.claude`) for Windows (Git Bash), macOS and Linux: rules, hooks that enforce them, skills, agents, mods and a status line. A repeated correction moves from chat to a `CLAUDE.md` rule to a hook that blocks it.
 
 ## Install
 
-Needs Claude Code 2.1.324 or later: the third-party plugin marketplaces in `settings.json` are pinned to reviewed commits, and older versions can't load a pinned marketplace.
-
-Already use Claude Code? Move your folder aside first (`mv ~/.claude ~/.claude.bak-$(date +%F)`), then copy back what you want to keep (`personal.md`, project memory) after the install.
-
-Install Claude Code but don't start it yet. Its installer already creates `~/.claude`, so a plain `git clone` into it fails; fetch into the folder instead. Same three commands on Windows (Git Bash), macOS and Linux, safe to rerun:
+Needs Claude Code 2.1.324+. Already use Claude Code? Back up first: `mv ~/.claude ~/.claude.bak`.
 
 ```bash
 mkdir -p ~/.claude && git -C ~/.claude init -b main && { git -C ~/.claude remote add origin https://github.com/RoyAbra27/claude-config 2>/dev/null || git -C ~/.claude remote set-url origin https://github.com/RoyAbra27/claude-config; } && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
 claude   # log in once, then quit
-bash ~/.claude/bootstrap.sh
+bash ~/.claude/bootstrap.sh   # add --dry-run to see the plan first
 ```
 
-`bootstrap.sh` installs the CLI tools (winget on Windows, Homebrew on macOS, apt or dnf on Linux; `--dry-run` shows the plan first), asks which third-party skills you want, and is safe to rerun. The setup starts in auto mode (`defaultMode` in `settings.json`); change it before the first start if you want permission prompts.
+Bootstrap installs the CLI tools, then asks which skills, mods and components you want and your editor. Enter keeps the defaults. It starts in auto mode; set `defaultMode` in `settings.json` before the first start if you want permission prompts.
 
-It also asks four questions; the defaults are the owner's setup. Answer them up front with flags (the usage header at the top of `bootstrap.sh` documents each):
+### Or let your agent take care of it
 
-| Question | Flag | Default |
-|---|---|---|
-| Which mods to enable | `--mods all\|none\|proof,ready,shot,ratchet,compaction-insurance` | `all` |
-| Keep the owner's style checks: `guard.sh` blocks em-dashes and `Co-Authored-By` trailers, and `attribution.commit` hides the commit trailer | `--style-checks keep\|drop` | `keep` |
-| Components to leave out: `mcp` (the mobile MCP server), `statusline` (ccline), `lint` (lint-on-save hook), `costly-loop` (retry-loop hook) | `--skip none\|mcp,statusline,lint,costly-loop` | `none` |
-| Editor command (`EDITOR` in `settings.json`; `none` unsets it) | `--editor <cmd>\|none` | `zed` |
+Paste this into Claude Code:
 
-Your answers are saved to the untracked `local/choices` and replayed on every rerun, every non-terminal run and every `update.sh`; a flag changes one answer. They are written into `settings.json`; in a fork bootstrap commits that change locally, in a clone of this repo it tells you to commit it yourself, so `update.sh` rebases your choices instead of fighting them.
-
-## Uninstall
-
-Delete `~/.claude` and restore your backup. Bootstrap also installed, outside that folder: the global npm packages `agent-browser` and `@cometix/ccline`, the uv tool `markitdown`, and the `mobile` MCP server in `~/.claude.json` (`claude mcp remove --scope user mobile`); the mods keep their data in `~/.claude-mods-data`. The base tools (git, jq, uv, node) stay; remove them with your package manager if you want.
+```text
+Install the Claude Code config from https://github.com/RoyAbra27/claude-config into ~/.claude.
+1. Copy ~/.claude to ~/.claude.bak-<date> (copy, don't move: this session runs from it).
+2. Follow the README's Install section. If git refuses to overwrite existing files, move only
+   those files into the backup and retry.
+3. Before running bootstrap.sh, ask me its questions (skills, mods, style checks, components
+   to skip, editor; see the usage header in bootstrap.sh) and pass my answers as flags.
+4. Tell me what was installed, what failed, and to restart Claude Code.
+```
 
 ## What you get
 
-| Part | What it does for you |
+| Part | What it does |
 |---|---|
-| Hooks (`hooks/`) | `guard.sh` blocks destructive commands, secret leaks and risky edits before they run. `plan-redteam-gate.sh` makes a plan survive an attack before you build it. `costly_loop.py` stops blind retry loops. `session-context.sh` starts every session with your branch and the skill router. `lint-on-save.sh` runs the project's own prettier and eslint |
-| Skills (`skills/`) | Process on demand: `plan-redteam`, `consult`, `debugging-protocol`, `branch-audit`, `buy-vs-build`, `testing-workflow`, `subagent-dispatch`, `parallel-ticket-delivery` and more. `hooks/skill-router.md` maps situations to them |
-| Agents (`agents/`) | Scoped workers: `builder` implements one brief and reports a checkable result, `explore-cheap` searches code cheaply, plus research, critic and consult agents |
-| Commands (`commands/`) | `/save-session`, `/resume-session`, `/reflect` carry state across sessions and turn mistakes into proposed fixes |
-| Mods (`mods/`) | Small plugins: `/ready` (push checklist), `/shot` (before/after screenshots), `/ratchet` (correction counter), `proof` (warns on untested changes), `compaction-insurance` (saves state before compaction) |
-| Status line (`ccline/`) | A ccline status line for the main session and subagents. It prints nothing if ccline isn't installed |
+| Hooks | `guard.sh` blocks destructive commands, secret leaks and risky edits; `plan-redteam-gate.sh` makes plans survive an attack; `costly_loop.py` stops blind retry loops; `lint-on-save.sh` runs your project's linters |
+| Skills | `plan-redteam`, `consult`, `debugging-protocol`, `branch-audit`, `buy-vs-build`, `testing-workflow` and more; `hooks/skill-router.md` says when each fires |
+| Agents | `builder`, `explore-cheap`, research, critic and consult agents |
+| Commands | `/save-session`, `/resume-session`, `/reflect` |
+| Mods | `/ready`, `/shot`, `/ratchet`, `proof`, `compaction-insurance` |
+| Status line | ccline, silent if not installed |
 
 ## Make it yours
 
-- Fork it and edit anything. The owner's style checks (em-dash and `Co-Authored-By` blocking in `guard.sh`) switch off with `bootstrap.sh --style-checks drop`; every safety rule stays on.
-- To drop the whole guard, remove its entries from `settings.json`, never the file: the entries use `"onFailure": "block"`, so a missing `guard.sh` blocks every tool call.
-- In a fork, point `extraKnownMarketplaces.local-mods.source.repo` in `settings.json` at your fork, so the mods come from your copy.
-- Machine-specific rules go in `personal.md`: `CLAUDE.md` imports it with `@personal.md`, it is untracked, and a missing file is harmless. Copy `personal.example.md` to start.
-- Describe your own stack in `autoMode.environment` in `settings.json`, and review `defaultMode` and the allow/deny rules. Commit your edits in your clone: `update.sh` rebases local commits onto upstream, and on a conflict with uncommitted edits it stops and leaves them in `git stash`.
-- Owner defaults you may not want: the `kotlin-lsp` plugin is enabled, and the `custom:cockpit` theme (`themes/cockpit.json`) is set.
-- Try a mod edit locally with `claude --plugin-dir mods/<x>`.
-- Pull upstream changes with `bash update.sh`. It never installs a third-party skill you didn't pick, and finishes with the hook tests.
-- Weekly setup review (opt-in): `bash scripts/weekly-review.sh` writes `reviews/setup-review-<date>.md`; once `reviews/` exists, the session start reminds you weekly. Track your own trials in the untracked `local/trials.tsv` (same columns as `scripts/trials.tsv`, no header).
-- `CLAUDE.md` assumes `jq` (required by the hooks), Python 3, `uv` and `markitdown`; bootstrap installs them.
+- Update: `bash ~/.claude/update.sh`. Commit your own edits in the clone; updates rebase them.
+- Your bootstrap answers live in `local/choices` and are replayed on every update; rerun `bootstrap.sh` with a flag to change one.
+- Style checks (on by default): the guard blocks em-dashes and `Co-Authored-By` trailers. Turn them off with `bootstrap.sh --style-checks drop`.
+- Machine-specific rules go in the untracked `personal.md` (see `personal.example.md`).
+- To remove the guard, delete its entries in `settings.json`, never the file: a missing `guard.sh` blocks every tool call.
+- Forks: point `extraKnownMarketplaces.local-mods` in `settings.json` at your fork.
+
+## Uninstall
+
+Delete `~/.claude` and restore your backup. Outside it, bootstrap added the npm packages `agent-browser` and `@cometix/ccline`, the uv tool `markitdown`, the `mobile` MCP server (`claude mcp remove --scope user mobile`) and `~/.claude-mods-data`.
 
 ## Contributing
 
-Issues are welcome; pull requests too, small and one topic each. Run the hook tests (`bash hooks/smoke.test.sh`, `guard.test.sh`, `update.test.sh`, `no-questions.test.sh`) with `HOME` pointed at a throwaway folder, since some write there. With this config active, the guard blocks em-dashes and `Co-Authored-By` trailers in your commits.
-
-## Measure it
-
-`bash scripts/ab-setup.sh` compares your setup to vanilla Claude Code on the same tasks. The owner's 2026-11-25 result: the same pass rate on small tasks, about 45% more tokens, and the preferences enforced.
+Issues and small PRs welcome. Run the hook tests in `hooks/*.test.sh` with `HOME` pointed at a throwaway folder.
 
 ## Credits
 
-These third-party skills are not included in this repo. `scripts/install-skills.sh` (which `bootstrap.sh` runs) installs the ones you pick from upstream:
+Third-party skills are installed from upstream by `scripts/install-skills.sh`, not bundled:
 
 | Skill | Upstream | License |
 |---|---|---|
@@ -80,8 +69,8 @@ These third-party skills are not included in this repo. `scripts/install-skills.
 | codebase-design, improve-codebase-architecture, to-tickets, wizard | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
 | android-material3-design-system, android-viewsystem-foundations | [krutikJain/android-agent-skills](https://github.com/krutikJain/android-agent-skills) | MIT |
 
-Plugins: [superpowers](https://github.com/obra/superpowers), [ponytail](https://github.com/DietrichGebert/ponytail), [claude-hud](https://github.com/jarrodwatts/claude-hud), [hyperframes](https://github.com/heygen-com/hyperframes) and the official Claude plugins. The git guardrails in `guard.sh` and some of the testing ideas are adapted from mattpocock/skills.
+Plugins: [superpowers](https://github.com/obra/superpowers), [ponytail](https://github.com/DietrichGebert/ponytail), [claude-hud](https://github.com/jarrodwatts/claude-hud), [hyperframes](https://github.com/heygen-com/hyperframes) and the official Claude plugins. The git guardrails in `guard.sh` are adapted from mattpocock/skills.
 
 ## License
 
-MIT for everything in this repo. Third-party skills keep their own licenses.
+MIT for this repo; third-party skills keep their own licenses.
