@@ -7,7 +7,7 @@
 ## Environment
 - PowerShell profile is the path `$PROFILE` reports (~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1), not the stale OneDrive copy; oh-my-posh config is ~/.oh-my-posh/clean-detailed.omp.json
 - When running PowerShell commands from bash, use absolute Windows paths (C:\Users\USER\...) not $HOME
-- Any `!` command suggested to the user uses absolute paths: the session cwd moves between repos and worktrees (added 2026-11-11)
+- Any `!` command suggested to the user uses absolute paths: the session cwd moves between repos and worktrees (added 2026-11-11), quoted with forward slashes, since Bash strips unquoted backslashes (added 2026-11-25)
 - **Git Bash path rewriting (added 2026-10-29):** an argument starting with `/` that is not a file path (URL path, health-check path, route) gets rewritten to `C:/Program Files/Git/...`; prefix that command with `MSYS_NO_PATHCONV=1`. Never set it globally: it breaks `/c/...` paths passed to Windows programs. A remote one-off command (Render job `--start-command`) gets no shell either: never put `$VAR`, quotes or shell syntax there, because an error echoes the expanded string (added 2026-11-11). Run a plain repo command (`<repo-cli> ...`) that reads its env itself
 - Run repo shell scripts with the Bash tool, never `bash` inside PowerShell: there it resolves to the WSL launcher (added 2026-10-29)
 - Before re-running a stopped test or smoke suite, kill leftover `node`/`python` children (`taskkill //F //T //PID <pid>`); results from a run that overlapped stale processes are invalid (added 2026-10-29)
@@ -38,7 +38,7 @@
 - No two views/endpoints showing overlapping data; merge or delete.
 
 ## Verification
-- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18). Before saying a visual fix is done, check each element the request named and show a screenshot per element, naming where it was seen (the emulator is not the phone) (added 2026-11-24)
+- For multi-step tasks, state a brief plan with verifiable success criteria for each step before starting. Never say what I did or set up (a key, a password, a config) without evidence: show it or say it's unknown (added 2026-11-18). Before saying a visual fix is done, check each element the request named and show a screenshot per element, naming where it was seen (the emulator is not the phone) (added 2026-11-24). A visual tweak changes only the property named; everything else stays as it was (added 2026-11-25)
 - Never pipe a test command (`| tail`, `| head`, `| grep`) in a chain that commits: run it alone and check its exit code (added 2026-10-29)
 - **Blocked steps (added 2026-10-29):** do every step the guard hook or auto mode allows first, then give the blocked ones (push, deletes, DROP, bucket locks, hook edits) as one numbered `!` block at the end, with preconditions. Never chain a blockable command onto other work. Before offering a step that discards work (`reset --hard`, `branch -D`, `checkout -- .`, force push), run `git status` and `git log` on that repo and say what it would drop (added 2026-11-18)
 
