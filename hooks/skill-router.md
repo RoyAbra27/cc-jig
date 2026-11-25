@@ -30,6 +30,9 @@ When a situation below applies, use the listed skill or agent and say so in one 
 | Drive or screenshot a web page | `agent-browser` CLI via Bash for headless checks (`snapshot -i`, `close` when done); `claude-in-chrome` only when the user's logged-in Chrome is needed |
 | Break a plan or spec into dependency-ordered tickets | `/to-tickets` (user-invoked: suggest it) |
 | Several independent tickets to ship as separate PRs, or a plan wave of 2+ file-disjoint tasks | `parallel-ticket-delivery`; propose it and confirm before dispatching (it runs several agents at once) |
+| A hard plan, or a bug that survived two fix attempts, with effort already high | suggest `/advisor` (user-invoked); never for routine work (added 2026-11-25) |
+| "Keep going until the tests pass / the build is green" | suggest `/goal` with a turn cap (user-invoked) (added 2026-11-25) |
+| Waiting on a stream: `adb logcat`, deploy logs, `gh run watch`, a dev server | the Monitor tool on that stream, never a sleep-and-poll loop (added 2026-11-25) |
 
 Examples:
 - "Add a retry wrapper around the S3 client" -> `buy-vs-build` before writing it (check framework built-ins and installed deps, then `library-scout`), then `testing-workflow`.

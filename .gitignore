@@ -9,6 +9,7 @@
 !/agents/
 !/commands/
 !/scripts/
+!/workflows/
 !/dotfiles/
 !/bootstrap.sh
 !/README.md
