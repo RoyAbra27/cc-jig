@@ -19,12 +19,12 @@ Cost: about 130-230k tokens per lane on Opus, ~1-1.5M per audit. Say so before d
 Fill `references/brief-template.md` into a file next to the package. It carries the system summary, inputs, hard rules (read-only, no tests that reset shared DBs, no secrets or real data printed, no subagents) and the fixed finding format. Every lane reads it first; the lane prompt adds only scope.
 
 ### 3. Pick lanes and dispatch in one message
-Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Dispatch all chosen lanes in ONE message, background, `model: opus`, general-purpose; when the backend framework has a file in `~/.claude/skills/backend-api/references/` (e.g. `nestjs.md`), tell the `api-surface` lane to read it. Each writes `audit-<lane>.md` and replies with counts and Important+ titles only.
+Lanes and their scopes are in `references/lanes.md`. Always: `api-surface`, `data-path`, `deploy`, `omissions`. Conditional: `client-contract` (the branch ships a contract or guide for another team's client), `privacy` (personal, health or financial data). Run the saved workflow: `Workflow({name: "branch-audit", args: {brief, workspace, repo, branch, head, rulings, lanes: [{name, scope}]}})`, each `scope` adapted from `references/lanes.md`. It runs every lane on Opus, then the step 4 consolidator, and returns their replies; the user watches lane progress in `/workflows`. When the backend framework has a file in `~/.claude/skills/backend-api/references/` (e.g. `nestjs.md`), say in the `api-surface` scope to read it. Each lane writes `audit-<lane>.md` and replies with counts and Important+ titles only.
 
-While they run, relay each completion to the user in two or three lines: counts, and the Important titles in plain words. Don't wait silently for all of them.
+If the workflow is missing, dispatch the lanes yourself in ONE message, background, `model: opus`, general-purpose, relay each completion in two or three lines (counts, Important titles in plain words), then run step 4 by hand.
 
 ### 4. Consolidate
-When all lanes are back, dispatch one Opus consolidator with `references/consolidator.md`. It merges duplicates, re-verifies every Important+ and every code fix against HEAD, buckets items (FIX-CODE, USER-DECISION, FIX-DOCS, DEFER, DROP), drafts the fix-wave units, writes lane statistics, and does the conformance pass.
+The workflow runs this step. By hand: when all lanes are back, dispatch one Opus consolidator with `references/consolidator.md`. It merges duplicates, re-verifies every Important+ and every code fix against HEAD, buckets items (FIX-CODE, USER-DECISION, FIX-DOCS, DEFER, DROP), drafts the fix-wave units, writes lane statistics, and does the conformance pass.
 
 ### 5. Decide with the user
 - Put every USER-DECISION to the user with AskUserQuestion: the options, your recommendation first, the cost of each in one line.
