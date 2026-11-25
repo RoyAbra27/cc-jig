@@ -16,6 +16,18 @@
     "defaultMode": "auto"
   },
   "hooks": {
+    "PreSkillShellCommand": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/guard.sh\"'",
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|Bash|PowerShell",
@@ -233,9 +245,9 @@
     ],
     "environment": [
       "$defaults",
-      "**Primary use of Claude Code**: backend development (NestJS/TypeScript, Python) and infra (Terraform, Helm, AWS Lambda).",
-      "**Org-specific CLIs**: `rtk` is a pure output filter with no side effects of its own; judge `rtk <cmd>` exactly as `<cmd>` run directly. `jf` is the JFrog CLI. `uv`/`uvx` are the Python package/runner tools; installs go through the project lockfile.",
-      "**Sensitive data locations & audiences**: in addition to the default heuristic, treat any `.env*` file, Terraform state, and kubeconfig as credential-bearing; never print, commit, or transmit their contents."
+      "**Primary use of Claude Code**: Android apps in Kotlin (Gradle, adb against a USB phone or emulator), Python services and data scripts (uv), TypeScript/Node web apps and bots, deployed on Render with files in Cloudflare R2, on Windows with Git Bash.",
+      "**Org-specific CLIs**: `rtk` is a pure output filter with no side effects of its own; judge `rtk <cmd>` exactly as `<cmd>` run directly. `uv`/`uvx` are the Python package/runner tools; installs go through the project lockfile. `./gradlew` builds and tests are local; `adb install` to a connected device is routine, `adb uninstall` and `pm clear` delete participant data.",
+      "**Sensitive data locations & audiences**: in addition to the default heuristic, treat any `.env*` file, Android keystores (`*.jks`, `*.keystore`), `google-services.json`, Render and Cloudflare API keys, and exported participant data as credential-bearing or personal; never print, commit, or transmit their contents."
     ]
   }
 }
