@@ -21,10 +21,18 @@
 !/README.md
 !/LICENSE
 !/.github/
+!/themes/
+/themes/*
+!/themes/cockpit.json
 /skills/*-workspace/
 # Local eval runs (prompts, graders, HTML reports): never published
 evals-cc/
 __pycache__/
+# Session state the hooks and mods write in any folder: never published
+TASKS.md
+.superpowers/
+reviews/
+sessions/
 # Third-party skills and agents: installed from upstream by bootstrap.sh, credited in README.md
 /skills/archify/
 /skills/impeccable/

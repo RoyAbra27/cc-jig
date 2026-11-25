@@ -4,9 +4,6 @@ name	since	transcript pattern (main-session transcripts that used it; "-" = pass
 /ratchet mod	2026-11-26	<command-name>/ratchet</command-name>
 compaction-insurance mod	2026-11-26	Write this update to TASKS.md before the co
 proof mod	2026-11-26	-
-release-apk skill	2026-11-26	"skill":"release-apk"
-ble-field-logcat skill	2026-11-26	"skill":"ble-field-logcat"
-render-deploy-check skill	2026-11-26	"skill":"render-deploy-check"
 branch-audit workflow	2026-11-26	"name":"branch-audit"
 tsc rewake hook	2026-11-26	error TS[0-9]+
 lint-on-save hook	2026-11-26	-

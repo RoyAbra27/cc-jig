@@ -18,7 +18,8 @@ REVIEW_WEEK="$(date +%G-W%V)"
 REVIEW_DUE=""
 # Added 2026-11-25: a fresh install has nothing to review; the first review comes a week after the first session.
 [ -f "$CFG/.setup-review-since" ] || touch "$CFG/.setup-review-since" 2>/dev/null
-if [ "$SOURCE" = "startup" ] && [ ! -f "$CFG/.setup-review-$REVIEW_WEEK-done" ] \
+# Added 2026-11-25: opt-in; reviews/ exists only once weekly-review.sh (or ab-setup.sh) has run.
+if [ "$SOURCE" = "startup" ] && [ -d "$CFG/reviews" ] && [ ! -f "$CFG/.setup-review-$REVIEW_WEEK-done" ] \
    && [ -n "$(find "$CFG/.setup-review-since" -mtime +6 2>/dev/null)" ]; then
   REVIEW_DUE=1
 fi

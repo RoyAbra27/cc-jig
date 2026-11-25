@@ -25,7 +25,8 @@ STATE_JSON="$CFG/.claude.json"; [ -f "$STATE_JSON" ] || STATE_JSON="$HOME/.claud
   printf 'session-context.sh output\t%s\n' "$(echo '{"source":"startup"}' | bash hooks/session-context.sh 2>/dev/null | wc -c)"
   echo
   echo "## Trials (name, since, sessions that used it since then; '-' = passive)"
-  tail -n +2 scripts/trials.tsv | while IFS=$'\t' read -r name since pat; do
+  # local/trials.tsv (untracked, no header) holds your own trials; same columns
+  { tail -n +2 scripts/trials.tsv; if [ -f local/trials.tsv ]; then cat local/trials.tsv; fi; } | while IFS=$'\t' read -r name since pat; do
     if [ "$pat" = "-" ]; then n="-"; else
       # ab-fixture- dirs are A/B harness runs, not real sessions
       n=$(find projects -name '*.jsonl' -not -path '*/subagents/*' -not -path '*ab-fixture-*' -newermt "$since" -print0 2>/dev/null | xargs -0 -r grep -l -E -- "$pat" 2>/dev/null | wc -l)
