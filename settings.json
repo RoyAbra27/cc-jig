@@ -1,4 +1,5 @@
 {
+  "cleanupPeriodDays": 90,
   "env": {
     "EDITOR": "zed",
     "RTK_SUPPRESS_HOOK_WARNING": "1",
@@ -187,7 +188,11 @@
     "skill-creator@claude-plugins-official": true,
     "ponytail@ponytail": true,
     "hyperframes@hyperframes": true,
-    "kotlin-lsp@claude-plugins-official": true
+    "kotlin-lsp@claude-plugins-official": true,
+    "merman@merman": true,
+    "agent-standup-band@double-geste": true,
+    "chapters@modmyclaude": true,
+    "proof@local-mods": true
   },
   "extraKnownMarketplaces": {
     "claude-hud": {
@@ -213,6 +218,30 @@
         "source": "github",
         "repo": "heygen-com/hyperframes"
       }
+    },
+    "merman": {
+      "source": {
+        "source": "github",
+        "repo": "iamrohithrnair/merman"
+      }
+    },
+    "double-geste": {
+      "source": {
+        "source": "github",
+        "repo": "Atoll92/agent-standup"
+      }
+    },
+    "modmyclaude": {
+      "source": {
+        "source": "github",
+        "repo": "modmyclaude/claude-code-mods"
+      }
+    },
+    "local-mods": {
+      "source": {
+        "source": "directory",
+        "path": "C:\\Users\\USER\\Desktop\\claude-mods"
+      }
     }
   },
   "effortLevel": "medium",
@@ -221,15 +250,15 @@
       "effortLevel": "medium"
     }
   },
-  "cleanupPeriodDays": 90,
+  "pluginConfigs": {},
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "custom:cockpit",
   "editorMode": "normal",
+  "preferredNotifChannel": "terminal_bell",
   "autoCompactEnabled": true,
   "agentPushNotifEnabled": true,
-  "preferredNotifChannel": "terminal_bell",
   "skipAutoPermissionPrompt": true,
   "autoMode": {
     "allow": [
