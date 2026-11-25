@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # Install third-party skills from upstream (credited in README.md).
-# Usage: bash install-skills.sh                 pick interactively
+# Usage: bash install-skills.sh                 pick interactively (no terminal: none)
 #        bash install-skills.sh --select all|none|1,2,5
 #        add --dry-run to print the commands instead of running them
 #        add --update to reinstall skills that are already installed
 # Already-installed skills are skipped unless --update. Exits 1 if any selected install failed.
 set -uo pipefail
 SKILLS_DIR="${SKILLS_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills}"
-sk='npx -y skills@latest add'
+# Pinned CLIs, each published at least two weeks before it was picked: skills 1.8.1 (2026-11-11), impeccable 4.8.2 (2026-11-09)
+sk='npx -y skills@1.8.1 add'
 T=(-g -a claude-code)
 
 CATALOG=(
   "archify|diagrams and one-page explainers|$sk https://github.com/tt-a1i/archify --skill archify ${T[*]}"
-  "impeccable|frontend design, critique and polish (+ 4 agents, design hook)|npx -y impeccable install --providers=claude --scope=global"
+  "impeccable|frontend design, critique and polish (+ 4 agents, design hook)|npx -y impeccable@4.8.2 install --providers=claude --scope=global"
   "unslop|turn AI-looking UI into a designed interface|$sk heydamir/unslop --skill unslop ${T[*]}"
   "security-audit|Cloudflare's security review workflow|$sk cloudflare/security-audit-skill --skill security-audit ${T[*]}"
   "codebase-design|deep-module design vocabulary (mattpocock)|$sk mattpocock/skills --skill codebase-design ${T[*]}"
@@ -40,8 +41,9 @@ if [ -z "$SELECT" ]; then
     IFS='|' read -r name desc _ <<<"$row"
     printf '%3d) %-32s %s\n' "$i" "$name" "$desc"; i=$((i+1))
   done
-  if [ -t 0 ]; then read -rp "Install which skills? [all / none / e.g. 1,2,5] (all): " SELECT; fi
-  SELECT="${SELECT:-all}"
+  # No terminal (update.sh, CI): install nothing nobody picked
+  if [ -t 0 ]; then read -rp "Install which skills? [all / none / e.g. 1,2,5] (all): " SELECT; SELECT="${SELECT:-all}"
+  else SELECT=none; fi
 fi
 
 case "$SELECT" in

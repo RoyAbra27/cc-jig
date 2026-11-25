@@ -6,15 +6,34 @@ The core idea is a ratchet: a repeated correction moves from a chat message to a
 
 ## Install
 
-Install Claude Code but don't start it yet. Its installer already creates `~/.claude`, so a plain `git clone` into it fails; fetch into the folder instead. Same three commands on Windows (Git Bash), macOS and Linux:
+Needs Claude Code 2.1.324 or later: the third-party plugin marketplaces in `settings.json` are pinned to reviewed commits, and older versions can't load a pinned marketplace.
+
+Already use Claude Code? Move your folder aside first (`mv ~/.claude ~/.claude.bak-$(date +%F)`), then copy back what you want to keep (`personal.md`, project memory) after the install.
+
+Install Claude Code but don't start it yet. Its installer already creates `~/.claude`, so a plain `git clone` into it fails; fetch into the folder instead. Same three commands on Windows (Git Bash), macOS and Linux, safe to rerun:
 
 ```bash
-mkdir -p ~/.claude && git -C ~/.claude init -b main && git -C ~/.claude remote add origin https://github.com/RoyAbra27/claude-config && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
+mkdir -p ~/.claude && git -C ~/.claude init -b main && { git -C ~/.claude remote add origin https://github.com/RoyAbra27/claude-config 2>/dev/null || git -C ~/.claude remote set-url origin https://github.com/RoyAbra27/claude-config; } && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
 claude   # log in once, then quit
 bash ~/.claude/bootstrap.sh
 ```
 
 `bootstrap.sh` installs the CLI tools (winget on Windows, Homebrew on macOS, apt or dnf on Linux; `--dry-run` shows the plan first), asks which third-party skills you want, and is safe to rerun. The setup starts in auto mode (`defaultMode` in `settings.json`); change it before the first start if you want permission prompts.
+
+It also asks four questions; the defaults are the owner's setup. Answer them up front with flags (the usage header at the top of `bootstrap.sh` documents each):
+
+| Question | Flag | Default |
+|---|---|---|
+| Which mods to enable | `--mods all\|none\|proof,ready,shot,ratchet,compaction-insurance` | `all` |
+| Keep the owner's style checks: `guard.sh` blocks em-dashes and `Co-Authored-By` trailers, and `attribution.commit` hides the commit trailer | `--style-checks keep\|drop` | `keep` |
+| Components to leave out: `mcp` (the mobile MCP server), `statusline` (ccline), `lint` (lint-on-save hook), `costly-loop` (retry-loop hook) | `--skip none\|mcp,statusline,lint,costly-loop` | `none` |
+| Editor command (`EDITOR` in `settings.json`; `none` unsets it) | `--editor <cmd>\|none` | `zed` |
+
+Your answers are saved to the untracked `local/choices` and replayed on every rerun, every non-terminal run and every `update.sh`; a flag changes one answer. They are written into `settings.json`; in a fork bootstrap commits that change locally, in a clone of this repo it tells you to commit it yourself, so `update.sh` rebases your choices instead of fighting them.
+
+## Uninstall
+
+Delete `~/.claude` and restore your backup. Bootstrap also installed, outside that folder: the global npm packages `agent-browser` and `@cometix/ccline`, the uv tool `markitdown`, and the `mobile` MCP server in `~/.claude.json` (`claude mcp remove --scope user mobile`); the mods keep their data in `~/.claude-mods-data`. The base tools (git, jq, uv, node) stay; remove them with your package manager if you want.
 
 ## What you get
 
@@ -29,12 +48,20 @@ bash ~/.claude/bootstrap.sh
 
 ## Make it yours
 
-- Fork it and edit anything. Rules you don't share (for example em-dash and `Co-Authored-By` blocking in `guard.sh`) are plain checks you can delete.
+- Fork it and edit anything. The owner's style checks (em-dash and `Co-Authored-By` blocking in `guard.sh`) switch off with `bootstrap.sh --style-checks drop`; every safety rule stays on.
+- To drop the whole guard, remove its entries from `settings.json`, never the file: the entries use `"onFailure": "block"`, so a missing `guard.sh` blocks every tool call.
+- In a fork, point `extraKnownMarketplaces.local-mods.source.repo` in `settings.json` at your fork, so the mods come from your copy.
 - Machine-specific rules go in `personal.md`: `CLAUDE.md` imports it with `@personal.md`, it is untracked, and a missing file is harmless. Copy `personal.example.md` to start.
-- Describe your own stack in `autoMode.environment` in `settings.json`, and review `defaultMode` and the allow/deny rules.
+- Describe your own stack in `autoMode.environment` in `settings.json`, and review `defaultMode` and the allow/deny rules. Commit your edits in your clone: `update.sh` rebases local commits onto upstream, and on a conflict with uncommitted edits it stops and leaves them in `git stash`.
+- Owner defaults you may not want: the `kotlin-lsp` plugin is enabled, and the `custom:cockpit` theme (`themes/cockpit.json`) is set.
 - Try a mod edit locally with `claude --plugin-dir mods/<x>`.
-- Pull upstream changes with `bash update.sh`.
+- Pull upstream changes with `bash update.sh`. It never installs a third-party skill you didn't pick, and finishes with the hook tests.
+- Weekly setup review (opt-in): `bash scripts/weekly-review.sh` writes `reviews/setup-review-<date>.md`; once `reviews/` exists, the session start reminds you weekly. Track your own trials in the untracked `local/trials.tsv` (same columns as `scripts/trials.tsv`, no header).
 - `CLAUDE.md` assumes `jq` (required by the hooks), Python 3, `uv` and `markitdown`; bootstrap installs them.
+
+## Contributing
+
+Issues are welcome; pull requests too, small and one topic each. Run the hook tests (`bash hooks/smoke.test.sh`, `guard.test.sh`, `update.test.sh`, `no-questions.test.sh`) with `HOME` pointed at a throwaway folder, since some write there. With this config active, the guard blocks em-dashes and `Co-Authored-By` trailers in your commits.
 
 ## Measure it
 

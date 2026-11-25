@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/guard.sh\"'",
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard.sh\"'",
             "onFailure": "block"
           }
         ]
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/guard.sh\"'",
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard.sh\"'",
             "onFailure": "block"
           }
         ]
@@ -45,7 +45,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'",
+            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/costly_loop.py\"'",
             "onFailure": "continue"
           }
         ]
@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/plan-redteam-gate.sh\"'",
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/plan-redteam-gate.sh\"'",
             "onFailure": "block"
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/no-questions.sh\"'"
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/no-questions.sh\"'"
           }
         ]
       }
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'",
+            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/costly_loop.py\"'",
             "onFailure": "continue"
           }
         ]
@@ -86,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/lint-on-save.sh\"'"
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/lint-on-save.sh\"'"
           }
         ]
       },
@@ -95,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/plan-redteam-gate.sh\"'"
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/plan-redteam-gate.sh\"'"
           }
         ]
       },
@@ -104,7 +104,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"$HOME/.claude/skills/impeccable/scripts/impeccable\" ] || \"$HOME/.claude/skills/impeccable/scripts/impeccable\" hook",
+            "command": "[ ! -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" ] || \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" hook",
             "timeout": 5,
             "statusMessage": "Checking UI changes"
           }
@@ -117,7 +117,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"$HOME/.claude/hooks/costly_loop.py\"'",
+            "command": "bash -c 'P=$(command -v python || command -v python3) || exit 0; exec \"$P\" \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/costly_loop.py\"'",
             "onFailure": "continue"
           }
         ]
@@ -129,7 +129,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/session-context.sh\"'"
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/session-context.sh\"'"
           }
         ]
       },
@@ -137,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"$HOME/.claude/skills/impeccable/scripts/impeccable\" ] || \"$HOME/.claude/skills/impeccable/scripts/impeccable\" hook",
+            "command": "[ ! -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" ] || \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" hook",
             "timeout": 5,
             "statusMessage": "Preparing build session"
           }
@@ -149,7 +149,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ ! -f \"$HOME/.claude/skills/impeccable/scripts/impeccable\" ] || \"$HOME/.claude/skills/impeccable/scripts/impeccable\" hook",
+            "command": "[ ! -f \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" ] || \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/impeccable/scripts/impeccable\" hook",
             "timeout": 30,
             "statusMessage": "Design deep pass"
           }
@@ -161,7 +161,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$HOME/.claude/hooks/no-questions.sh\"'"
+            "command": "bash -c 'exec bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/no-questions.sh\"'"
           }
         ]
       }
@@ -206,43 +206,50 @@
     "claude-hud": {
       "source": {
         "source": "github",
-        "repo": "jarrodwatts/claude-hud"
+        "repo": "jarrodwatts/claude-hud",
+        "ref": "5fc08cbb610a7439993e40124637cbe193d60ea3"
       }
     },
     "ponytail": {
       "source": {
         "source": "github",
-        "repo": "DietrichGebert/ponytail"
+        "repo": "DietrichGebert/ponytail",
+        "ref": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10"
       }
     },
     "android-skills": {
       "source": {
         "source": "github",
-        "repo": "android/skills"
+        "repo": "android/skills",
+        "ref": "7f7b21730a605d112ca9f79b6e40105ce7b670ee"
       }
     },
     "hyperframes": {
       "source": {
         "source": "github",
-        "repo": "heygen-com/hyperframes"
+        "repo": "heygen-com/hyperframes",
+        "ref": "9f1b1b437c650b79e65ea2583b77c2b933baa6e4"
       }
     },
     "merman": {
       "source": {
         "source": "github",
-        "repo": "iamrohithrnair/merman"
+        "repo": "iamrohithrnair/merman",
+        "ref": "5b84fd7ed3835fcbbadc10ec2c217e20af1860d7"
       }
     },
     "double-geste": {
       "source": {
         "source": "github",
-        "repo": "Atoll92/agent-standup"
+        "repo": "Atoll92/agent-standup",
+        "ref": "177a3bf16d0d72f642677146661dcfdd791080f0"
       }
     },
     "modmyclaude": {
       "source": {
         "source": "github",
-        "repo": "modmyclaude/claude-code-mods"
+        "repo": "modmyclaude/claude-code-mods",
+        "ref": "8e8d41804c2e80697b79f1d45d4dd9d2824c78bd"
       }
     },
     "local-mods": {
@@ -287,5 +294,8 @@
       "**Org-specific CLIs**: `rtk` is a pure output filter with no side effects of its own; judge `rtk <cmd>` exactly as `<cmd>` run directly. `uv`/`uvx` are the Python package/runner tools; installs go through the project lockfile. `./gradlew` builds and tests are local; `adb install` to a connected device is routine, `adb uninstall` and `pm clear` delete participant data.",
       "**Sensitive data locations & audiences**: in addition to the default heuristic, treat any `.env*` file, Android keystores (`*.jks`, `*.keystore`), `google-services.json`, Render and Cloudflare API keys, and exported participant data as credential-bearing or personal; never print, commit, or transmit their contents."
     ]
+  },
+  "attribution": {
+    "commit": ""
   }
 }

@@ -34,7 +34,12 @@ rm -rf "$NQH"
 SCH=$(mktemp -d)
 sc() { printf '%s' '{"hook_event_name":"SessionStart","source":"startup"}' | CLAUDE_CONFIG_DIR="$SCH" bash "$DIR/session-context.sh" | grep -c 'setup review is due'; }
 [ "$(sc)" = 0 ] || { echo "FAIL session-context nags a fresh install about the setup review"; FAIL=1; }
-touch -d '8 days ago' "$SCH/.setup-review-since"
+# python, not touch -d: BSD touch (macOS) takes no relative dates
+PY=$(command -v python || command -v python3)
+"$PY" -c 'import os,sys,time; t=time.time()-8*86400; os.utime(sys.argv[1],(t,t))' "$SCH/.setup-review-since"
+# the review is opt-in: no reviews/ (weekly-review.sh never ran) means no reminder, even after a week
+[ "$(sc)" = 0 ] || { echo "FAIL session-context nags about a review that was never set up"; FAIL=1; }
+mkdir "$SCH/reviews"
 [ "$(sc)" = 0 ] && { echo "FAIL session-context skips the review after a week"; FAIL=1; }
 rm -rf "$SCH"
 hook 0 lint-on-save.sh '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x.md"}}'
@@ -48,13 +53,18 @@ export CL_STATE="$CLT/state" CL_LOG="$CLT/log.jsonl" CL_DURATIONS="$CLT/dur"
 while IFS= read -r cmd; do
   case "$cmd" in *skills/impeccable*) continue ;; esac
   case "$cmd" in
-    */.claude/hooks/*.sh*)
-      case "$cmd" in *'bash "$HOME/.claude/hooks/'*) ;; *) echo "FAIL settings hook not run via bash: $cmd"; FAIL=1 ;; esac ;;
+    */hooks/*.sh*)
+      case "$cmd" in *'bash "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/'*) ;; *) echo "FAIL settings hook not run via bash from the config dir: $cmd"; FAIL=1 ;; esac ;;
   esac
-  printf '{}' | sh -c "$cmd" >/dev/null 2>&1
+  printf '{}' | CLAUDE_CONFIG_DIR="$DIR/.." sh -c "$cmd" >/dev/null 2>&1
   rc=$?
   if [ "$rc" -eq 126 ] || [ "$rc" -eq 127 ]; then echo "FAIL settings command cannot start (exit $rc): $cmd"; FAIL=1; fi
 done < <(jq -r '(.hooks[][].hooks[].command), .statusLine.command' "$S")
+# Hook commands follow CLAUDE_CONFIG_DIR; only ccline keeps $HOME/.claude (its npm postinstall writes there)
+grep -n '\$HOME/\.claude/' "$S" | grep -v 'ccline/ccline' | sed 's/^/FAIL settings.json hard-codes $HOME\/.claude: /' | grep . && FAIL=1
+cmd=$(jq -r '.hooks.PreToolUse[0].hooks[0].command' "$S")
+printf '%s' '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | HOME=/nonexistent CLAUDE_CONFIG_DIR="$DIR/.." sh -c "$cmd" >/dev/null 2>&1 \
+  || { echo "FAIL guard command does not run from CLAUDE_CONFIG_DIR"; FAIL=1; }
 
 # costly_loop command with no python on PATH exits 0 quietly
 mkdir -p "$CLT/bin"
@@ -70,6 +80,9 @@ HOME="$CLT" USERPROFILE="$CLT" "$PY" "$DIR/../scripts/loop-metrics.py" --since 2
 jq -e '.script.gate_version and (.script | has("head") and has("argv"))' "$CLT/r.json" >/dev/null 2>&1 \
   || { echo "FAIL loop-metrics report has no script stamp"; FAIL=1; }
 find "$CLT" -type f -delete; find "$CLT" -depth -type d -exec rmdir {} \;
+
+# Third-party CLIs run at a pinned version, never @latest or unversioned
+grep -nE '@latest|npx -y [a-z@/-]+ ' "$DIR/../scripts/install-skills.sh" | grep -vE 'npx -y [a-z@/-]+@[0-9]' | sed 's/^/FAIL unpinned CLI in install-skills.sh: /' | grep . && FAIL=1
 
 # install-skills.sh marks unslop user-invoke-only without touching the rest of the file, once
 T=$(mktemp -d)
