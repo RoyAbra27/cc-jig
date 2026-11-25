@@ -33,17 +33,3 @@ When a situation below applies, use the listed skill or agent and say so in one 
 | A hard plan, or a bug that survived two fix attempts, with effort already high | suggest `/advisor` (user-invoked); never for routine work (added 2026-11-25) |
 | "Keep going until the tests pass / the build is green" | suggest `/goal` with a turn cap (user-invoked) (added 2026-11-25) |
 | Waiting on a stream: `adb logcat`, deploy logs, `gh run watch`, a dev server | the Monitor tool on that stream, never a sleep-and-poll loop (added 2026-11-25) |
-
-Examples:
-- "Add a retry wrapper around the S3 client" -> `buy-vs-build` before writing it (check framework built-ins and installed deps, then `library-scout`), then `testing-workflow`.
-- "Move sessions from Postgres to Redis, sketch the plan" then "are you sure?" -> `consult`, two `consult-side` dispatches in one message, verify their factual claims, then report.
-
-Red flags. These thoughts mean stop and check the table:
-
-| Thought | Reality |
-|---|---|
-| "It's a 30-line retry/queue/cache, faster to just write it" | That is exactly the case `buy-vs-build` exists for. Installed deps first, then search. |
-| "The plan looks solid, no need for a second opinion" | The author cannot grade its own plan. A fork between options means `consult`; a finished plan about to be executed means `plan-redteam`. |
-| "I'll just grep for it quickly" | Fan-out search belongs in `explore-cheap`. Keep file dumps out of this context. |
-| "I edited CLAUDE.md, done" | Run `prompt-shake` on the diff. Rules only grow otherwise. |
-| "Tests probably pass" | Run them. Paste the output. Then say done. |
