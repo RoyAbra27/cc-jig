@@ -265,7 +265,13 @@
       "effortLevel": "medium"
     }
   },
-  "pluginConfigs": {},
+  "pluginConfigs": {
+    "merman@merman": {
+      "options": {
+        "promptStyle": "bar"
+      }
+    }
+  },
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
