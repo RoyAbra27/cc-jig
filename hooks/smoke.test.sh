@@ -99,5 +99,24 @@ if [ "$(sed -n 2p "$T/unslop/SKILL.md")" != "disable-model-invocation: true" ] \
 fi
 find "$T" -type f -delete; find "$T" -depth -type d -exec rmdir {} \;
 
+# rule-hits.py: each hit kind counts once; a subagent transcript and a skill-less row never count
+R=$(mktemp -d); mkdir -p "$R/hooks" "$R/projects/p/subagents"
+printf '| Situation | Reach for |\n|---|---|\n| a | `alpha` |\n| b | `beta` |\n| c | `gamma` |\n| d | `delta` |\n| e | `chrome-x` |\n| f | `zeta` |\n| g | the Monitor tool |\n' > "$R/hooks/skill-router.md"
+{
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"plug:alpha"}}]}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Agent","input":{"subagent_type":"beta"}}]}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"Using gamma to check it"}]}}'
+  printf '%s\n' '{"type":"user","message":{"content":"<command-name>/delta</command-name>"}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"mcp__chrome-x__navigate","input":{}}]}}'
+} > "$R/projects/p/s.jsonl"
+printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"zeta"}}]}}' > "$R/projects/p/subagents/s.jsonl"
+# Windows ships a python3 Store stub that runs nothing; take the first interpreter that executes
+PY=; for c in python3 python; do "$c" -c '' 2>/dev/null && { PY=$c; break; }; done
+OUT=$(HOME="$R" CLAUDE_CONFIG_DIR="$R" "$PY" "$DIR/../scripts/rule-hits.py" 30)
+for want in '| a | alpha | 1 |' '| b | beta | 1 |' '| c | gamma | 1 |' '| d | delta | 1 |' '| e | chrome-x | 1 |' '| f | zeta | 0 |' '| g |  | n/a (names no skill) |'; do
+  printf '%s' "$OUT" | grep -qF -- "$want" || { echo "FAIL rule-hits.py missing: $want"; printf '%s\n' "$OUT"; FAIL=1; }
+done
+find "$R" -type f -delete; find "$R" -depth -type d -exec rmdir {} \;
+
 [ "$FAIL" -eq 0 ] && echo "smoke: all cases pass"
 exit "$FAIL"

@@ -2,6 +2,8 @@
 
 Turn this session's mistakes into the smallest durable fix. Propose only, and apply nothing without approval.
 
+**`/reflect counts`**: instead of step 1, run `python ~/.claude/scripts/rule-hits.py 30`. Candidates are router rows at 0 hits whose row is older than the window (`git log -S` on `hooks/skill-router.md`), proposed as cut or merge, and CLAUDE.md headings whose ratchet count keeps rising, proposed one ratchet layer up. Then continue at step 3.
+
 1. List what went wrong in this session, with evidence from the transcript: user corrections, failed attempts, steps that were redone, rules that were ignored, and tool calls that were denied or blocked. Skip anything that only matters to this one task. If nothing qualifies, say "nothing to reflect" and stop.
 2. For each item, check whether an existing rule already covers it: grep `~/.claude/CLAUDE.md`, the relevant `SKILL.md`, `hooks/skill-router.md` and memory.
    - Covered but ignored: propose tightening that rule, or move it up one ratchet layer (CLAUDE.md rule, then a hook in `hooks/guard.sh`).
