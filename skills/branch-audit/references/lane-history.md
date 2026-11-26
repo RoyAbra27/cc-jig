@@ -165,3 +165,14 @@ Lanes: hook-surface (attacker view of hook entry points), deploy (install/update
 | privacy | 7 | 1 | 5 | 1 | 2 |
 | omissions | 11 | 3 | 11 | 1 | 0 |
 Notes: the Critical was an allow-exception that exited early on a per-line match, so a second line rode along; only live exit-code probes with crafted input found it, so keep asking hook lanes to feed the real script. Deploy found the one data-loss bug by reproducing it in a throwaway repo. Fix-wave lesson: a fix brief that names a "remove X" ruling should ask whether to prompt instead; the user revised one mid-wave. Every lane produced a unique Important+ this run.
+
+## 2026-11-26 Project D, generated public export (1 sync commit, +3.7k / -13k)
+Lanes adapted to a CLI tool driven by agents, with no HTTP server: untrusted-input (api-surface analogue: untrusted text reaching agents with tools, an OAuth ingest plugin, URL fetchers), data-path, deploy, privacy (two directions: maintainer data in the export, a user's data in git or sent to third parties), omissions. 61 raw -> 44 merged (32 FIX-CODE, 3 USER-DECISION, 6 FIX-DOCS, 5 DEFER, 0 DROP), 0 Critical, 9 Important.
+| Lane | Raw | Dup | Unique verified | Unique Important+ | Dropped |
+|---|---|---|---|---|---|
+| untrusted-input | 18 | 7 | 11 | 2 | 0 |
+| data-path | 13 | 4 | 9 | 0 (its Important was found by three lanes) | 0 |
+| deploy | 8 | 3 | 5 | 0 | 0 |
+| privacy | 10 | 4 | 6 | 3 | 0 |
+| omissions | 12 | 6 | 7 | 2 | 0 |
+Notes: the most serious leak (test fixtures carrying the maintainer's real tracker rows) was invisible to a name-based sweep and only rated "medium confidence" by the lane, because lanes may not read the private data; the controller confirmed it by comparing fixtures to the private tracker without printing rows. When a lane suspects real data, plan a controller-side check against the private source. An ingest bug (a state cursor committed before the write, including on dry-run and timeout) was found independently by three lanes: for any new plugin or runner, ask "what does --dry-run persist?". Omissions again found the fresh-user dead ends (no path creates the first data file; defaults tuned to one person). Zero unique Important+ this run: data-path, deploy.
