@@ -297,5 +297,6 @@
   },
   "attribution": {
     "commit": ""
-  }
+  },
+  "spinnerTipsEnabled": false
 }

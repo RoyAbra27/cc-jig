@@ -23,8 +23,6 @@ left = [
   { metric = "task.label", icon = "", priority = 4 },
 ]
 right = [
-  { metric = "task.trend", priority = 1 },
-  { metric = "context", widget = "text", format = "{pct}% · {tokens}", compact = "{tokens}", priority = 3 },
   { metric = "model", compact = "{family}", priority = 2 },
   { metric = "task.elapsed", priority = 3 },
 ]
