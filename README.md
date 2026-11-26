@@ -1,6 +1,6 @@
 # cc-jig
 
-A Claude Code harness that turns your corrections into enforced rules. A repeated correction moves from chat to a `CLAUDE.md` rule to a hook that blocks it. It lives in `~/.claude` on Windows (Git Bash), macOS and Linux: rules, hooks that enforce them, skills, agents, mods and a status line.
+A repeated correction moves from chat to a `CLAUDE.md` rule to a hook that blocks it. It lives in `~/.claude` on Windows (Git Bash), macOS and Linux: rules, hooks that enforce them, skills, agents, mods and a status line.
 
 ## Install
 
