@@ -269,6 +269,7 @@
     "merman@merman": {
       "options": {
         "promptStyle": "bubble",
+        "copyButtonStyle": "hover",
         "accentColor": "#a497c8",
         "bulletColor": "#a497c8",
         "headingColor": "#d8cba6",
