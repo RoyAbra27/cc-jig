@@ -1,13 +1,13 @@
-# claude-config
+# cc-jig
 
-An opinionated Claude Code setup (`~/.claude`) for Windows (Git Bash), macOS and Linux: rules, hooks that enforce them, skills, agents, mods and a status line. A repeated correction moves from chat to a `CLAUDE.md` rule to a hook that blocks it.
+A Claude Code harness that turns your corrections into enforced rules. A repeated correction moves from chat to a `CLAUDE.md` rule to a hook that blocks it. It lives in `~/.claude` on Windows (Git Bash), macOS and Linux: rules, hooks that enforce them, skills, agents, mods and a status line.
 
 ## Install
 
 Needs Claude Code 2.1.324+. Already use Claude Code? Back up first: `mv ~/.claude ~/.claude.bak`.
 
 ```bash
-mkdir -p ~/.claude && git -C ~/.claude init -b main && { git -C ~/.claude remote add origin https://github.com/RoyAbra27/claude-config 2>/dev/null || git -C ~/.claude remote set-url origin https://github.com/RoyAbra27/claude-config; } && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
+mkdir -p ~/.claude && git -C ~/.claude init -b main && { git -C ~/.claude remote add origin https://github.com/RoyAbra27/cc-jig 2>/dev/null || git -C ~/.claude remote set-url origin https://github.com/RoyAbra27/cc-jig; } && git -C ~/.claude pull origin main && git -C ~/.claude branch -u origin/main
 claude   # log in once, then quit
 bash ~/.claude/bootstrap.sh   # add --dry-run to see the plan first
 ```
@@ -19,7 +19,7 @@ Bootstrap installs the CLI tools, then asks which skills, mods and components yo
 Paste this into Claude Code:
 
 ```text
-Install the Claude Code config from https://github.com/RoyAbra27/claude-config into ~/.claude.
+Install the Claude Code config from https://github.com/RoyAbra27/cc-jig into ~/.claude.
 1. Copy ~/.claude to ~/.claude.bak-<date> (copy, don't move: this session runs from it).
 2. Follow the README's Install section. If git refuses to overwrite existing files, move only
    those files into the backup and retry.

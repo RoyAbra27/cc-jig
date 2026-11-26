@@ -101,7 +101,7 @@ else
   printf '%s\n' "$NEW_SETTINGS" > "$S" && echo "updated   settings.json from your choices"
   # A local commit is what update.sh rebases (README "Make it yours"). Never commit in a clone of the upstream repo itself.
   case "$(git -C "$REPO" remote get-url origin 2>/dev/null)" in
-    *RoyAbra27/claude-config*) echo "Commit it so updates keep it: git -C \"$REPO\" commit -m 'chore: my bootstrap choices' settings.json" ;;
+    *RoyAbra27/cc-jig*|*RoyAbra27/claude-config*) echo "Commit it so updates keep it: git -C \"$REPO\" commit -m 'chore: my bootstrap choices' settings.json" ;;
     *) if git -C "$REPO" commit -q -m "chore: my bootstrap choices" -- settings.json >/dev/null 2>&1; then echo "committed settings.json (your choices) in your clone"
        else echo "Commit it so updates keep it: git -C \"$REPO\" commit -m 'chore: my bootstrap choices' settings.json"; fi ;;
   esac
@@ -112,8 +112,9 @@ if [ "$ONLY" = 1 ]; then apply_choices; exit $?; fi
 # Origin is the public repo; a fork needs `upstream` so update.sh pulls from the original
 if git -C "$REPO" rev-parse --git-dir >/dev/null 2>&1 && ! git -C "$REPO" remote get-url upstream >/dev/null 2>&1; then
   case "$(git -C "$REPO" remote get-url origin 2>/dev/null)" in
-    *RoyAbra27/claude-config*) ;;
-    *) step "upstream remote"; run git -C "$REPO" remote add upstream https://github.com/RoyAbra27/claude-config.git ;;
+    # claude-config is the repo's old name; clones made before the rename still point at it
+    *RoyAbra27/cc-jig*|*RoyAbra27/claude-config*) ;;
+    *) step "upstream remote"; run git -C "$REPO" remote add upstream https://github.com/RoyAbra27/cc-jig.git ;;
   esac
 fi
 

@@ -255,7 +255,7 @@
     "local-mods": {
       "source": {
         "source": "github",
-        "repo": "RoyAbra27/claude-config"
+        "repo": "RoyAbra27/cc-jig"
       }
     }
   },

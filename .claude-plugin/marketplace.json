@@ -1,7 +1,7 @@
 {
   "name": "local-mods",
   "owner": { "name": "local" },
-  "description": "Small Claude Code mods from claude-config: push checklist, screenshots, correction counter, test alarm, compaction insurance.",
+  "description": "Small Claude Code mods from cc-jig: push checklist, screenshots, correction counter, test alarm, compaction insurance.",
   "plugins": [
     { "name": "proof", "source": "./mods/proof", "description": "Alarm-only: speaks only when code is untested or the last test failed." },
     { "name": "ready", "source": "./mods/ready", "description": "/ready: a read-only push checklist for the current repo." },
