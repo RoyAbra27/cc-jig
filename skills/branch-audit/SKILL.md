@@ -33,6 +33,8 @@ The workflow runs this step. By hand: when all lanes are back, dispatch one Opus
 ### 6. One fix wave, one re-review
 - Write a fix brief: scope = FIX-CODE + FIX-DOCS + decided items; explicitly out of scope = DEFER, DROP, undecided. One implementer (Opus), tests first, commit per work unit, data-loss units first.
 - If you changed code yourself after the consolidation, re-check each unit's conflicts and Done-when against HEAD before dispatching it.
+- Guard-hook changes go out as two patches: tighten-only, which you apply, and loosening, which the user runs. Auto mode refuses a patch that loosens the guard, even inside a combined one.
+- Before the push, run every new or changed CI step locally as CI runs it: `bash -e -o pipefail`, with `BASE=$(git rev-parse origin/main)`. Checks that compare against a base break on files the base lacks.
 - Then one scoped re-review of the fix range against the item list. Residuals get adjudicated, not a second wave.
 
 ### 7. Feed the skill
