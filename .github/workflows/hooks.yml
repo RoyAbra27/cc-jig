@@ -34,7 +34,8 @@ jobs:
           fail=0
           for d in mods/*/; do
             git diff --quiet "$BASE" HEAD -- "$d" && continue
-            old=$(git show "$BASE:${d}.claude-plugin/plugin.json" 2>/dev/null | jq -r .version)
+            # a mod new since BASE has no old plugin.json; git show fails, and under pipefail that must not end the step
+            old=$(git show "$BASE:${d}.claude-plugin/plugin.json" 2>/dev/null | jq -r .version || true)
             new=$(jq -r .version "${d}.claude-plugin/plugin.json")
             [ "$old" != "$new" ] || { echo "${d} changed but its version is still $new: bump it in ${d}.claude-plugin/plugin.json"; fail=1; }
           done
