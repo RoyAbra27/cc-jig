@@ -74,6 +74,12 @@ test('passing test then edit: untested', async ($, on) => {
   expect(r.text).toBe('⚠ untested: code changed after the last test (npm test passed 2m ago)')
 })
 
+test('a test started in the background is not a pass', async ($, on) => {
+  const bg = { tool: 'Bash', command: 'npm test', run_in_background: true } as never
+  const r = await run($, on, [[10_000, () => $.tool.call(edit('src/a.ts'))], [20_000, () => $.tool.call(bg)]])
+  expect(r.text).toBe('⚠ untested: code changed and no test has run this session')
+})
+
 test('failing test: test failed', async ($, on) => {
   const r = await run($, on, [[10_000, () => $.tool.call(bash('npm test'))]], false)
   expect(r.text).toBe('✘ test failed: npm test (2m ago)')

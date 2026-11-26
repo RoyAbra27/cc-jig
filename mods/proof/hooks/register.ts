@@ -58,7 +58,8 @@ export const register: Register = on => {
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const r = await next(e)
     const cmd = checkOf(e.command)
-    if (r.deny === undefined && cmd) lastCheck = { cmd, ok: !r.isError, at: await $.clock.now() }
+    // A background run returns at once, before the test has a result, so it proves nothing yet.
+    if (r.deny === undefined && cmd && !e.run_in_background) lastCheck = { cmd, ok: !r.isError, at: await $.clock.now() }
     return r
   })
 
