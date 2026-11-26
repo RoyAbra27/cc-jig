@@ -268,7 +268,29 @@
   "pluginConfigs": {
     "merman@merman": {
       "options": {
-        "promptStyle": "bar"
+        "promptStyle": "bar",
+        "accentColor": "#a497c8",
+        "bulletColor": "#a497c8",
+        "headingColor": "#d8cba6",
+        "tableHeaderColor": "#d8cba6",
+        "strongColor": "#f1eef8",
+        "emphasisColor": "#c9a8bf",
+        "inlineCodeColor": "#a9c3cf",
+        "codeTextColor": "#c6c3d3",
+        "codeCommandColor": "#a9b6d6",
+        "codeFlagColor": "#c79aa8",
+        "codeStringColor": "#b5c9a7",
+        "codeCommentColor": "#6d6a7c",
+        "pathColor": "#a9c3cf",
+        "linkColor": "#a9b6d6",
+        "numberColor": "#c6c3d3",
+        "quoteColor": "#8d8a9e",
+        "ruleColor": "#363343",
+        "tableRuleColor": "#4d4a5c",
+        "diagramColor": "#a9b6d6",
+        "diagramTextColor": "#c6c3d3",
+        "diffAddedColor": "#9cc4a0",
+        "diffRemovedColor": "#d6909b"
       }
     }
   },
