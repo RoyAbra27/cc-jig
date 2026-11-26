@@ -23,6 +23,11 @@ STATE_JSON="$CFG/.claude.json"; [ -f "$STATE_JSON" ] || STATE_JSON="$HOME/.claud
   echo "## Session-start text size (characters; tokens ~ chars/4)"
   for f in CLAUDE.md hooks/skill-router.md; do printf '%s\t%s\n' "$f" "$(wc -c < "$f")"; done
   printf 'session-context.sh output\t%s\n' "$(echo '{"source":"startup"}' | bash hooks/session-context.sh 2>/dev/null | wc -c)"
+  # the whole prefix (skills, plugins, MCP, tools, injections), not just the files above; ~$0.33 per run
+  # ab-fixture- dir name keeps this run out of the trial counts below
+  fx=$(mktemp -d -t ab-fixture-prefix.XXXXXX)
+  printf 'measured prefix tokens per request (claude -p, empty dir)\t%s\n' "$(cd "$fx" && claude -p 'Reply with just: ok' --output-format json 2>/dev/null | jq '.usage | .input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens' || echo unknown)"
+  rmdir "$fx" 2>/dev/null || true
   echo
   echo "## Trials (name, since, sessions that used it since then; '-' = passive)"
   # local/trials.tsv (untracked, no header) holds your own trials; same columns
